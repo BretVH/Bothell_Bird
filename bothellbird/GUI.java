@@ -16,10 +16,8 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -41,17 +39,25 @@ import javax.swing.ListSelectionModel;
 public class GUI extends JFrame {
 
     private static final long serialVersionUID = 1L;
-    private JButton nameSearch;
+
+    /**
+     * @param args//
+     */
+    public static void main(String[] args) {
+        java.awt.EventQueue.invokeLater(() -> {
+            JFrame.setDefaultLookAndFeelDecorated(true);
+            new GUI().setVisible(true);
+        });
+    }
+    private JButton search;
     private JTextField searchBox;
-    private JList<?> listJList;
+    private JList<?> birdsJList;
     private JScrollPane jScrollPane;
     private JPanel listPanel;
-    private ArrayList<ImageIcon> images;
+    private ArrayList<ImageIcon> birdIcons;
     private ArrayList<BirdInfo> birdNames;
-    private ArrayList<BirdInfo> updater;
-    private BirdNameRetriever birdNamer;
-    private ImageRetriever imager;
-    private JPanel nameSearcher;
+    private ArrayList<BirdInfo> updatedBirdData;
+    private JPanel searchPanel;
     private JPanel imagePanel;
     private JButton searchByFeatures;
     private JLabel pic;
@@ -59,33 +65,30 @@ public class GUI extends JFrame {
     private JPanel buttonPanel;
     private JButton displayBird;
     private Map<Integer, String> birdIdToBirdName;
-    private Map<String, ImageIcon> icons = new TreeMap<>();
-    private final ArrayList<BirdInfo> newer;
-    private Set<BirdInfo> uniqueSetOfBirdNameOb;
+    private Set<BirdInfo> birds;
     private ListCellRenderer lr;
     private boolean hasAdded = false;
     private ActionListener listener;
     private JButton next = new JButton("Select Feature and Continue Search");
     private final JLabel featuresJlistJLabel;
     private JList<String> selectableFeaturesJList = new JList<>();
-    private final DefaultListModel<String> model;
+    private final DefaultListModel<String> jListModel;
     private Map<String, ArrayList<String>> featureToSelectableFeatureMap;
-    private final HashMap<String, Integer> birdie;
+    private final HashMap<String, Integer> birdNameToBirdIdMap;
 
     /**
      * @throws HeadlessException
      */
     public GUI() throws HeadlessException {
-        this.birdie = new HashMap<>();
-        this.featureToSelectableFeatureMap = new TreeMap<>();
-        this.model = new DefaultListModel<>();
+        this.birdNameToBirdIdMap = new HashMap<>();
+        this.featureToSelectableFeatureMap = new HashMap<>();
+        this.jListModel = new DefaultListModel<>();
         this.featuresJlistJLabel = new JLabel();
-        this.uniqueSetOfBirdNameOb = new LinkedHashSet<>();
-        this.newer = new ArrayList<>();
+        this.birds = new LinkedHashSet<>();
         setVisible(true);
-        createData();
+        populateBirdNameToBirdIdMap();
         GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        this.setExtendedState(this.MAXIMIZED_BOTH | this.getExtendedState());
+        this.setExtendedState(this.getExtendedState() | this.MAXIMIZED_BOTH);
         setName("BothellBirder by Team 5");
         setLayout(new BorderLayout());
         setIconImage(Toolkit.getDefaultToolkit().getImage("defaultBird.jpg")); //sets icon
@@ -95,19 +98,216 @@ public class GUI extends JFrame {
         revalidate();
     }
 
+    private String[] getFeatureNames() {
+        String[] featureNames = new String[featureToSelectableFeatureMap.size()];
+        int z = 0;
+        for (Map.Entry<String, ArrayList<String>> entry : featureToSelectableFeatureMap.entrySet()) {
+            featureNames[z] = entry.getKey();
+            z++;
+        }
+        return featureNames;
+    }
+
+    private int[] getFeatureIds(ArrayList<String> selectedFeature) {
+        //selectedFeature is a list of feature names followed by that...
+        //feature ids,  we only want the ids...
+        int arraySize = (selectedFeature.size() / 2) + 1;
+        int[] featureIDs = new int[arraySize];
+        int counter = 0;
+        //get ids.
+        for (int g = 1; g < featureIDs.length; g += 2) {
+            int featureID = Integer.parseInt(selectedFeature.get(g));
+            featureIDs[counter] = featureID;
+            counter++;
+        }
+        return featureIDs;
+    }
+
+    private void populateBirdNameToBirdIdMap() {
+        birdNames = new ArrayList<>();
+        birdIcons = new ArrayList<>();
+
+        try {
+            birdNames = BirdNameRetriever.readData();
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Can't connect to database!",
+                    "", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Using offline data");
+            BirdInfo bird = new BirdInfo("CondorMan", 0, 0);
+            birdNames.add(bird);
+        }
+        for (BirdInfo birdInfo : birdNames) {
+            birdNameToBirdIdMap.put(birdInfo.getName(), birdInfo.getBirdId());
+        }
+    }
+
+    public ActionListener makeThis(String[] a, int b, int[] c) {
+        ActionListener nextAction = new Next(a, b, c);
+        return nextAction;
+    }
+
+    private void createFeaturesJList(int selectedFeaturesIndex) throws SQLException {
+        featureToSelectableFeatureMap = DescriptionRetriever.getFeatures();
+        String[] featureNames = getFeatureNames();
+        ArrayList<String> selectedFeature = featureToSelectableFeatureMap.get(featureNames[selectedFeaturesIndex]);
+        int[] featureIds = getFeatureIds(selectedFeature);
+        //remove ids from selected features, leave only names....
+        ///Description retriever needs refactored...featureToSelctableFeatureMap
+        //Should be a Map to BirdFeature objects and a BirdFeature class
+        //should be introduced...
+        for (int index = 0; index < selectedFeature.size() - 1; index++) {
+            selectedFeature.remove(index + 1);
+        }
+        int i = 0;
+        jListModel.clear();
+        for (String featureName : selectedFeature) {
+            jListModel.add(i, featureName);
+            i++;
+        }
+        selectableFeaturesJList = new JList<>((String[]) selectedFeature.toArray());
+        selectableFeaturesJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        selectableFeaturesJList.setModel(jListModel);
+        selectableFeaturesJList.setSelectedIndex(0);
+        JScrollPane jScrollPanes = new javax.swing.JScrollPane(selectableFeaturesJList);
+        next = new JButton("Next set of criteria");
+        imagePanel.removeAll();
+        JLabel aFeatureName = new JLabel(featureNames[selectedFeaturesIndex]);
+        imagePanel.add(aFeatureName);
+        imagePanel.add(featuresJlistJLabel);
+        imagePanel.add(jScrollPanes);
+        listener = makeThis(featureNames, selectedFeaturesIndex, featureIds);
+        next.addActionListener(listener);
+        imagePanel.add(next);
+        imagePanel.revalidate();
+        revalidate();
+    }
+
+    private void initComponents() {
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        createJPanels();
+        createButtons();
+        createSearchBox();
+        createList();
+    }
+
+    private void createSearchBox() {
+        pic = new JLabel(new ImageIcon("defaultBird.jpg"));
+        imagePanel.add(pic);
+        searchBox = new JTextField();
+        searchBox.setText("Enter Bird Name Here");
+        searchBox.setColumns(20);
+        searchPanel.add(searchBox);
+        searchBox.grabFocus();
+    }
+
+    private void createJPanels() {
+        listPanel = new JPanel();
+        imagePanel = new JPanel();
+        searchPanel = new JPanel();
+        buttonPanel = new JPanel();
+        setLayout(new BorderLayout());
+        add(listPanel, BorderLayout.WEST);
+        add(searchPanel, BorderLayout.NORTH);
+        add(imagePanel, BorderLayout.EAST);
+        add(buttonPanel, BorderLayout.SOUTH);
+        setName("BothellBirder by Team 5");
+    }
+
+    private void createButtons() {
+        search = new JButton("Search by name");
+        ActionListener nameSearches = new NameSearch();
+        search.addActionListener(nameSearches);
+        searchByFeatures = new JButton("Search by features");
+        displayBird = new JButton("Display Bird Selected in List");
+        ActionListener dis = new Birder();
+        displayBird.addActionListener(dis);
+        ActionListener feat = new Searcher();
+        searchByFeatures.addActionListener(feat);
+        resetList = new JButton("Reset List to default (clear features search)");
+        ActionListener reset = new Reseter();
+        resetList.addActionListener(reset);
+        searchPanel.add(search);
+        buttonPanel.add(searchByFeatures);
+        buttonPanel.add(resetList);
+        buttonPanel.add(displayBird);
+    }
+
+    private void updateList(ArrayList<BirdInfo> listOfBirds) {
+        int k = 0;
+        Integer[] birdID = new Integer[listOfBirds.size()];
+        for (BirdInfo IDa : listOfBirds) {
+            birdID[k] = (Integer) IDa.getNameId();
+            k++;
+        }
+        birdsJList = new JList<>(birdID);
+        birdsJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        birdsJList.setSelectedIndex(0);
+        birdsJList.setVisibleRowCount(3);
+        jScrollPane = new javax.swing.JScrollPane(birdsJList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        listPanel.removeAll();
+        birdsJList.setCellRenderer(lr);
+        listPanel.add(jScrollPane, java.awt.BorderLayout.WEST);
+        listPanel.revalidate();
+        getContentPane().revalidate();
+    }
+
+    private void createList() {
+        Map<String, ImageIcon> birdNameToBirdIconMap = getInitJListData();
+        Integer[] birdIds = new Integer[birdNames.size()];
+        int i = 0;
+        for (BirdInfo ID : birdNames) {
+            birdIds[i] = (Integer) ID.getNameId();
+            i++;
+        }
+        birdsJList = new JList<>(birdIds);
+        birdsJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        birdsJList.setSelectedIndex(0);
+        birdsJList.setVisibleRowCount(3);
+        jScrollPane = new javax.swing.JScrollPane(birdsJList,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        listPanel.add(jScrollPane, java.awt.BorderLayout.WEST);
+        lr = new ListRenderer(birdNameToBirdIconMap, birdIdToBirdName);
+        birdsJList.setCellRenderer(lr);
+    }
+
+    private Map<String, ImageIcon> getInitJListData() {
+        Map<String, ImageIcon> birdNameToBirdIconMap = new HashMap<>();
+        birdIcons = new ArrayList<>();
+        ImageIcon test = new ImageIcon("0a0.jpg");
+        birdIdToBirdName = new HashMap<>();
+        int index = 0;
+        for (BirdInfo name : birdNames) {
+            try {
+                birdIcons.add(ImageRetriever.readData(name.getBirdId(), name.getNameId()));
+            } catch (SQLException e) {
+            } catch (IOException ex) {
+                Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            birdNameToBirdIconMap.put(name.getName(), birdIcons.get(index));
+            birdIdToBirdName.put(name.getNameId(), name.getName());
+            index++;
+        }
+        if (birdNames.isEmpty()) {
+            birdNameToBirdIconMap.put("empty", test);
+        }
+        return birdNameToBirdIconMap;
+    }
+
     class NameSearch implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            String toFind = searchBox.getText();
-            if (birdie.get(toFind) != null) {
+            String birdName = searchBox.getText();
+            if (birdNameToBirdIdMap.get(birdName) != null) {
                 ArrayList<String> names = new ArrayList<>();
                 for (BirdInfo aName : birdNames) {
-                    if (aName.getBirdId() == birdie.get(toFind)) {
+                    if (aName.getBirdId() == birdNameToBirdIdMap.get(birdName)) {
                         names.add(aName.getName());
                     }
                 }
-                JFrame display = new BirdGUI(birdie.get(toFind), names);
+                JFrame display = new BirdGUI(birdNameToBirdIdMap.get(birdName), names);
                 display.setVisible(true);
                 setName("BothellBirder by Team 5");
                 display.setBounds(30, 30, 800, 600);
@@ -137,7 +337,7 @@ public class GUI extends JFrame {
             int birdId = 0;
             ArrayList<String> names = new ArrayList<>();
             for (BirdInfo birdName : birdNames) {
-                if (birdName.getNameId() == (Integer) listJList.getSelectedValue()) {
+                if (birdName.getNameId() == (Integer) birdsJList.getSelectedValue()) {
                     birdId = birdName.getBirdId();
                 }
             }
@@ -160,7 +360,11 @@ public class GUI extends JFrame {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            makeFeaturesJList(0);
+            try {
+                createFeaturesJList(0);
+            } catch (SQLException ex) {
+                Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 
@@ -185,26 +389,26 @@ public class GUI extends JFrame {
                 theIndexOfTheCurrentFeature = 0;
                 hasAdded = false;
             } else {
-                ArrayList<BirdInfo> newer = new ArrayList<>();
                 try {
-                    int featr = birdNamer.getFeatureID(featureNames[theIndexOfTheCurrentFeature]);
-                    int aGoodIndex = selectableFeaturesJList.getSelectedIndex() + 1;
+                    int featureId = BirdNameRetriever.getFeatureID(featureNames[theIndexOfTheCurrentFeature]);
+                    int featureIndex = selectableFeaturesJList.getSelectedIndex() + 1;
 
-                    updater = birdNamer.updateData(featr, aGoodIndex);
+                    updatedBirdData = BirdNameRetriever.updateData(featureId, featureIndex);
 
                     if (!hasAdded) {
-                        uniqueSetOfBirdNameOb = new LinkedHashSet<>(updater);
+                        birds = new LinkedHashSet<>(updatedBirdData);
                         hasAdded = true;
-                        ArrayList<BirdInfo> updatedList = new ArrayList<>();
-                        updatedList.addAll(uniqueSetOfBirdNameOb);
+                        ArrayList<BirdInfo> updatedList;
+                        updatedList = new ArrayList<>();
+                        updatedList.addAll(birds);
                     } else {
-                        BirdInfo[] b = new BirdInfo[uniqueSetOfBirdNameOb.size()];
+                        BirdInfo[] b = new BirdInfo[birds.size()];
                         int theIndex = 0;
-                        for (BirdInfo a : uniqueSetOfBirdNameOb) {
+                        for (BirdInfo a : birds) {
                             boolean stillExists = false;
 
-                            for (int z = 0; z < updater.size(); z++) {
-                                if (updater.get(z).getBirdId() == a.getBirdId()) {
+                            for (int z = 0; z < updatedBirdData.size(); z++) {
+                                if (updatedBirdData.get(z).getBirdId() == a.getBirdId()) {
                                     stillExists = true;
                                 }
                             }
@@ -214,224 +418,27 @@ public class GUI extends JFrame {
                             }
                         }
                         for (int j = 0; j < theIndex; j++) {
-                            uniqueSetOfBirdNameOb.remove(b[j]);
+                            birds.remove(b[j]);
                         }
                     }
 
-                    listJList.removeAll();
+                    birdsJList.removeAll();
                     Integer[] birdID;
-                    birdID = new Integer[uniqueSetOfBirdNameOb.size()];
+                    birdID = new Integer[birds.size()];
 
                     int k = 0;
                     ArrayList<BirdInfo> updatedList = new ArrayList<>();
-                    for (BirdInfo ID : uniqueSetOfBirdNameOb) {
+                    for (BirdInfo ID : birds) {
                         birdID[k] = (Integer) ID.getBirdId();
                         k++;
                     }
-                    updatedList.addAll(uniqueSetOfBirdNameOb);
+                    updatedList.addAll(birds);
                     updateList(updatedList);
-                    boolean hasAdded = true;
-                    makeFeaturesJList(theIndexOfTheCurrentFeature + 1);
+                    createFeaturesJList(theIndexOfTheCurrentFeature + 1);
                 } catch (SQLException e1) {
                 }
             }
         }
     }
 
-    private void createData() {
-        birdNames = new ArrayList<>();
-        images = new ArrayList<>();
-        birdNamer = new BirdNameRetriever();
-        imager = new ImageRetriever();
-        try {
-            birdNames = birdNamer.readData();
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Can't connect to database!",
-                    "", JOptionPane.WARNING_MESSAGE);
-        }
-        for (BirdInfo aBirdie : birdNames) {
-            birdie.put(aBirdie.getName(), aBirdie.getBirdId());
-        }
-    }
-
-    public ActionListener makeThis(String[] a, int b, int[] c) {
-        ActionListener nextAction = new Next(a, b, c);
-        return nextAction;
-    }
-
-    private void makeFeaturesJList(int anIndex) {
-        DescriptionRetriever make = new DescriptionRetriever();
-        try {
-            featureToSelectableFeatureMap = make.getFeatures();
-        } catch (SQLException e1) {
-        }
-        String[] featureName = new String[featureToSelectableFeatureMap.size()];
-        int z = 0;
-        for (Map.Entry<String, ArrayList<String>> entry : featureToSelectableFeatureMap.entrySet()) {
-            featureName[z] = entry.getKey();
-            z++;
-        }
-        ArrayList<String> feature = new ArrayList<>(featureToSelectableFeatureMap.get(featureName[anIndex]));//new ArrayList<String>();
-        int[] IDS;
-        if (feature.size() == 2) {
-            IDS = new int[2];
-        } else {
-            IDS = new int[feature.size() / 2 + 1];
-        }
-        ArrayList<String> list = featureToSelectableFeatureMap.get(featureName[anIndex]);
-        int counter = 0;
-        for (int g = 1; g < IDS.length - 2; g += 2) {
-            int featureID = Integer.parseInt(list.get(g));
-            IDS[counter] = featureID;
-            counter++;
-        }
-        for (int index = 0; index < list.size(); index++) {
-            list.remove(index + 1);
-        }
-        int i = 0;
-        model.clear();
-        for (String fam : list) {
-            model.add(i, fam);
-            i++;
-        }
-        String[] as = new String[list.size()];
-        selectableFeaturesJList = new JList<>(list.toArray(as));
-        selectableFeaturesJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        selectableFeaturesJList.setModel(model);
-        selectableFeaturesJList.setSelectedIndex(0);
-        JScrollPane jScrollPanes = new javax.swing.JScrollPane(selectableFeaturesJList);
-        next = new JButton("Next set of criteria");
-        imagePanel.removeAll();
-        JLabel aFeatureName = new JLabel(featureName[anIndex]);
-        imagePanel.add(aFeatureName);
-        imagePanel.add(featuresJlistJLabel);
-        imagePanel.add(jScrollPanes);
-        listener = makeThis(featureName, anIndex, IDS);
-        next.addActionListener(listener);
-        imagePanel.add(next);
-        imagePanel.revalidate();
-        revalidate();
-    }
-
-    private void initComponents() {
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        createJPanels();
-        createButtons();
-        createOther();
-        createList();
-    }
-
-    private void createOther() {
-        pic = new JLabel(new ImageIcon("defaultBird.jpg"));
-        imagePanel.add(pic);
-        searchBox = new JTextField();
-        searchBox.setText("Enter Bird Name Here");
-        searchBox.setColumns(20);
-        nameSearcher.add(searchBox);
-        searchBox.grabFocus();
-    }
-
-    private void createJPanels() {
-        listPanel = new JPanel();
-        imagePanel = new JPanel();
-        nameSearcher = new JPanel();
-        buttonPanel = new JPanel();
-        setLayout(new BorderLayout());
-        add(listPanel, BorderLayout.WEST);
-        add(nameSearcher, BorderLayout.NORTH);
-        add(imagePanel, BorderLayout.EAST);
-        add(buttonPanel, BorderLayout.SOUTH);
-        setName("BothellBirder by Team 5");
-    }
-
-    private void createButtons() {
-        nameSearch = new JButton("Search by name");
-        ActionListener nameSearches = new NameSearch();
-        nameSearch.addActionListener(nameSearches);
-        searchByFeatures = new JButton("Search by features");
-        displayBird = new JButton("Display Bird Selected in List");
-        ActionListener dis = new Birder();
-        displayBird.addActionListener(dis);
-        ActionListener feat = new Searcher();
-        searchByFeatures.addActionListener(feat);
-        resetList = new JButton("Reset List to default (clear features search)");
-        ActionListener reset = new Reseter();
-        resetList.addActionListener(reset);
-        nameSearcher.add(nameSearch);
-        buttonPanel.add(searchByFeatures);
-        buttonPanel.add(resetList);
-        buttonPanel.add(displayBird);
-    }
-
-    private void updateList(ArrayList<BirdInfo> listOfBirds) {
-        int k = 0;
-        Integer[] birdID = new Integer[listOfBirds.size()];
-        for (BirdInfo IDa : listOfBirds) {
-            birdID[k] = (Integer) IDa.getNameId();
-            k++;
-        }
-        listJList = new JList<>(birdID);
-        listJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        listJList.setSelectedIndex(0);
-        listJList.setVisibleRowCount(3);
-        jScrollPane = new javax.swing.JScrollPane(listJList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        listPanel.removeAll();
-        listJList.setCellRenderer(lr);
-        listPanel.add(jScrollPane, java.awt.BorderLayout.WEST);
-        listPanel.revalidate();
-        getContentPane().revalidate();
-    }
-
-    private void createList() {
-        getInitJListData();
-        Integer[] birdID = new Integer[birdNames.size()];
-        int i = 0;
-        for (BirdInfo ID : birdNames) {
-            birdID[i] = (Integer) ID.getNameId();
-            i++;
-        }
-        listJList = new JList<>(birdID);
-        listJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        listJList.setSelectedIndex(0);
-        listJList.setVisibleRowCount(3);
-        jScrollPane = new javax.swing.JScrollPane(listJList,
-                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        listPanel.add(jScrollPane, java.awt.BorderLayout.WEST);
-        lr = new ListRenderer(icons, birdIdToBirdName);
-        listJList.setCellRenderer(lr);
-    }
-
-    private void getInitJListData() {
-        icons = new TreeMap<>();
-        images = new ArrayList<>();
-        ImageIcon test = new ImageIcon("0a0.jpg");
-        birdIdToBirdName = new HashMap<>();
-        int index = 0;
-        for (BirdInfo name : birdNames) {
-            try {
-                images.add(imager.readData(name.getBirdId(), name.getNameId()));
-            } catch (SQLException e) {
-            } catch (IOException ex) {
-                Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            icons.put(name.getName(), images.get(index));
-            birdIdToBirdName.put(name.getNameId(), name.getName());
-            index++;
-        }
-        if (birdNames.isEmpty()) {
-            icons.put("empty", test);
-        }
-    }
-
-    /**
-     * @param args//
-     */
-    public static void main(String[] args) {
-        java.awt.EventQueue.invokeLater(() -> {
-            JFrame.setDefaultLookAndFeelDecorated(true);
-            new GUI().setVisible(true);
-        });
-    }
 }
