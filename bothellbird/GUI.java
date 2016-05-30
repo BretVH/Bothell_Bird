@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -39,28 +40,18 @@ import javax.swing.ListSelectionModel;
 public class GUI extends JFrame {
 
     private static final long serialVersionUID = 1L;
-
-    /**
-     * @param args//
-     */
-    public static void main(String[] args) {
-        java.awt.EventQueue.invokeLater(() -> {
-            JFrame.setDefaultLookAndFeelDecorated(true);
-            new GUI().setVisible(true);
-        });
-    }
     private JButton search;
     private JTextField searchBox;
     private JList<?> birdsJList;
     private JScrollPane jScrollPane;
     private JPanel listPanel;
+    private ImageIcon pic;
     private ArrayList<ImageIcon> birdIcons;
     private ArrayList<BirdInfo> birdNames;
     private ArrayList<BirdInfo> updatedBirdData;
     private JPanel searchPanel;
     private JPanel imagePanel;
     private JButton searchByFeatures;
-    private JLabel pic;
     private JButton resetList;
     private JPanel buttonPanel;
     private JButton displayBird;
@@ -84,12 +75,13 @@ public class GUI extends JFrame {
         this.featureToSelectableFeatureMap = new HashMap<>();
         this.jListModel = new DefaultListModel<>();
         this.featuresJlistJLabel = new JLabel();
+        this.pic = new ImageIcon("defaultBird.jpg");
         this.birds = new LinkedHashSet<>();
         setVisible(true);
         populateBirdNameToBirdIdMap();
         GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
         this.setExtendedState(this.getExtendedState() | this.MAXIMIZED_BOTH);
-        setName("BothellBirder by Team 5");
+        setName("BothellBirder \u00a9 Bret Van Hof");
         setLayout(new BorderLayout());
         setIconImage(Toolkit.getDefaultToolkit().getImage("defaultBird.jpg")); //sets icon
         setVisible(true);
@@ -123,6 +115,7 @@ public class GUI extends JFrame {
         return featureIDs;
     }
 
+    
     private void populateBirdNameToBirdIdMap() {
         birdNames = new ArrayList<>();
         birdIcons = new ArrayList<>();
@@ -164,7 +157,7 @@ public class GUI extends JFrame {
             jListModel.add(i, featureName);
             i++;
         }
-        selectableFeaturesJList = new JList<>((String[]) selectedFeature.toArray());
+        selectableFeaturesJList = new JList<>((String[])selectedFeature.toArray());
         selectableFeaturesJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         selectableFeaturesJList.setModel(jListModel);
         selectableFeaturesJList.setSelectedIndex(0);
@@ -185,14 +178,15 @@ public class GUI extends JFrame {
     private void initComponents() {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         createJPanels();
+        JLabel defaultImage = new JLabel(pic);
+        imagePanel.add(defaultImage);
         createButtons();
+        addButtonsToPanels();
         createSearchBox();
-        createList();
+        createList(birdNames);
     }
 
-    private void createSearchBox() {
-        pic = new JLabel(new ImageIcon("defaultBird.jpg"));
-        imagePanel.add(pic);
+    private void createSearchBox() { 
         searchBox = new JTextField();
         searchBox.setText("Enter Bird Name Here");
         searchBox.setColumns(20);
@@ -210,7 +204,7 @@ public class GUI extends JFrame {
         add(searchPanel, BorderLayout.NORTH);
         add(imagePanel, BorderLayout.EAST);
         add(buttonPanel, BorderLayout.SOUTH);
-        setName("BothellBirder by Team 5");
+        setName("BothellBirder \u00a9 Bret Van Hof");
     }
 
     private void createButtons() {
@@ -226,49 +220,27 @@ public class GUI extends JFrame {
         resetList = new JButton("Reset List to default (clear features search)");
         ActionListener reset = new Reseter();
         resetList.addActionListener(reset);
-        searchPanel.add(search);
-        buttonPanel.add(searchByFeatures);
-        buttonPanel.add(resetList);
-        buttonPanel.add(displayBird);
     }
 
     private void updateList(ArrayList<BirdInfo> listOfBirds) {
-        int k = 0;
-        Integer[] birdID = new Integer[listOfBirds.size()];
-        for (BirdInfo IDa : listOfBirds) {
-            birdID[k] = (Integer) IDa.getNameId();
-            k++;
-        }
-        birdsJList = new JList<>(birdID);
-        birdsJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        birdsJList.setSelectedIndex(0);
-        birdsJList.setVisibleRowCount(3);
-        jScrollPane = new javax.swing.JScrollPane(birdsJList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        listPanel.removeAll();
-        birdsJList.setCellRenderer(lr);
-        listPanel.add(jScrollPane, java.awt.BorderLayout.WEST);
+        createList(listOfBirds);
         listPanel.revalidate();
         getContentPane().revalidate();
     }
+    
+    
 
-    private void createList() {
+    private void createList(ArrayList<BirdInfo> listOfBirds) {
         Map<String, ImageIcon> birdNameToBirdIconMap = getInitJListData();
-        Integer[] birdIds = new Integer[birdNames.size()];
-        int i = 0;
-        for (BirdInfo ID : birdNames) {
-            birdIds[i] = (Integer) ID.getNameId();
-            i++;
-        }
-        birdsJList = new JList<>(birdIds);
-        birdsJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        birdsJList.setSelectedIndex(0);
-        birdsJList.setVisibleRowCount(3);
+        Integer[] birdIds = getBirdIds(listOfBirds);
+        listPanel.removeAll();
+        birdsJList = createBirdsJList(birdIds);
         jScrollPane = new javax.swing.JScrollPane(birdsJList,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         listPanel.add(jScrollPane, java.awt.BorderLayout.WEST);
-        lr = new ListRenderer(birdNameToBirdIconMap, birdIdToBirdName);
+        if(lr == null)
+            lr = new ListRenderer(birdNameToBirdIconMap, birdIdToBirdName);
         birdsJList.setCellRenderer(lr);
     }
 
@@ -295,23 +267,63 @@ public class GUI extends JFrame {
         return birdNameToBirdIconMap;
     }
 
+    /**
+     * @param args//
+     */
+    public static void main(String[] args) {
+        java.awt.EventQueue.invokeLater(() -> {
+            JFrame.setDefaultLookAndFeelDecorated(true);
+            new GUI().setVisible(true);
+        });
+    }
+
+    private JList<?> createBirdsJList(Integer[] birdIds) {
+        JList<?> birdsJList = new JList<>(birdIds);
+        birdsJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        birdsJList.setSelectedIndex(0);
+        birdsJList.setVisibleRowCount(3);
+        return birdsJList;
+    }
+
+    private Integer[] getBirdIds(ArrayList<BirdInfo> birdNames) {
+        Integer[] birdIds = new Integer[birdNames.size()];
+        int count = 0;
+        for (BirdInfo ID : birdNames) {
+            birdIds[count] = (int) ID.getNameId();
+            count++;
+        }
+        return birdIds;
+    }
+
+    private void addButtonsToPanels() {
+        searchPanel.add(search);
+        buttonPanel.add(searchByFeatures);
+        buttonPanel.add(resetList);
+        buttonPanel.add(displayBird);
+    }
+    
+    private void displayBirdGUI(int birdId, ArrayList<String> names, String name) {
+              JFrame display = new BirdGUI(birdId, names);
+                display.setVisible(true);
+                setName(name + " \u00a9 Bret Van Hof");
+                display.setBounds(30, 30, 800, 600);
+                display.toFront();
+    }
+    
     class NameSearch implements ActionListener {
 
         @Override
         public void actionPerformed(ActionEvent e) {
             String birdName = searchBox.getText();
             if (birdNameToBirdIdMap.get(birdName) != null) {
+                int birdId = birdNameToBirdIdMap.get(birdName);
                 ArrayList<String> names = new ArrayList<>();
                 for (BirdInfo aName : birdNames) {
                     if (aName.getBirdId() == birdNameToBirdIdMap.get(birdName)) {
                         names.add(aName.getName());
                     }
                 }
-                JFrame display = new BirdGUI(birdNameToBirdIdMap.get(birdName), names);
-                display.setVisible(true);
-                setName("BothellBirder by Team 5");
-                display.setBounds(30, 30, 800, 600);
-                display.toFront();
+               displayBirdGUI(birdId, names, birdName);
             } else {
                 JOptionPane.showMessageDialog(null, "Bird Not Found!",
                         "", JOptionPane.WARNING_MESSAGE);
@@ -324,7 +336,7 @@ public class GUI extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             listPanel.removeAll();
-            createList();
+            createList(birdNames);
             hasAdded = false;
             listPanel.revalidate();
         }
@@ -335,10 +347,12 @@ public class GUI extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             int birdId = 0;
+            String name = "";
             ArrayList<String> names = new ArrayList<>();
             for (BirdInfo birdName : birdNames) {
                 if (birdName.getNameId() == (Integer) birdsJList.getSelectedValue()) {
                     birdId = birdName.getBirdId();
+                    name = birdName.getName();
                 }
             }
             for (BirdInfo aName : birdNames) {
@@ -347,11 +361,7 @@ public class GUI extends JFrame {
                 }
             }
             if (birdId != 0) {
-                JFrame display = new BirdGUI(birdId, names);
-                display.setVisible(true);
-                setName("BothellBirder by Team 5");
-                display.setBounds(30, 30, 800, 600);
-                display.toFront();
+                displayBirdGUI(birdId, names, name);
             }
         }
     }
@@ -434,6 +444,7 @@ public class GUI extends JFrame {
                     }
                     updatedList.addAll(birds);
                     updateList(updatedList);
+                    hasAdded = true;
                     createFeaturesJList(theIndexOfTheCurrentFeature + 1);
                 } catch (SQLException e1) {
                 }
@@ -442,3 +453,4 @@ public class GUI extends JFrame {
     }
 
 }
+
