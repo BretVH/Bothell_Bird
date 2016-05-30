@@ -5,4 +5,4 @@
  * @author Bret Van Hof
  *
  */
-package BothellBirder;
+package bothell_bird;
