@@ -1,6 +1,5 @@
 package bothell_bird;
 
-import bothellbird.SimpleDataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -1,6 +1,5 @@
 package bothell_bird;
 
-import bothellbird.SimpleDataSource;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;

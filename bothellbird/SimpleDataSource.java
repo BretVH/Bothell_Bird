@@ -1,4 +1,4 @@
-package bothellbird;
+package bothell_bird;
 
 
 /*
