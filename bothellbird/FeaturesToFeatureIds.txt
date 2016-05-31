@@ -1,0 +1,103 @@
+/*
+CONSERVATION
+2	Critically Endangered
+7	Data Deficient
+3	Endangered
+1	Extinct
+6	Least Concern
+5	Near Threatened
+8	Not Evaluated
+4	Vulnerable
+FAMILY
+1	Barbets
+2	Birds of prey
+3	Cave birds
+4	Cuckoos
+5	Elephant birds
+6	Game birds
+7	Geese
+8	Guans (bird)
+9	Herons
+10	Hummingbirds
+11	Ibises
+12	Jays
+13	Kingfishers
+14	Magpies and treepies
+15	Nightjars
+16	Parrots
+17	Pelicans
+18	Penguins
+19	Perching birds
+20	Potoos
+21	Puffbirds
+22	Puffins
+23	Ratites
+24	Seabirds
+25	Seriemas
+26	Shorebirds
+27	Songbirds
+28	Swans
+29	Swifts
+30	Tinamous
+31	Toucans
+32	Trogons
+33	Wading birds
+34	Waterfowl
+HABITATS
+7	Caves and Subterranean Habitats (non-aquatic)
+8	Desert
+1	Forest
+4	Grassland
+9	Marine
+6	Rocky Areas [e.g. inland cliffs, mountain peaks]
+2	Savanna
+3	Shrubland
+5	Wetlands (inland)
+LOCATIONS
+6	Antarctia
+4	Asia
+5	Australia
+2	Central and South America
+3	Europe
+1	North America
+PRIMARY COLORS
+1	Black
+12	Black and White
+2	Blue
+3	Brown
+13	Brown and White
+4	Gray
+15	Green
+5	Olive
+6	Orange
+16	Pink
+17	Purple or Violet
+7	Red
+8	Rufous or Rust
+9	Sheen or Iridescence
+10	White
+11	Yellow
+SECONDARY COLORS
+1	Black
+2	Brown
+3	Buff
+4	Tan
+5	Rufous or Rust
+6	Red
+7	Pink
+8	Orange
+9	Yellow
+10	Olive
+11	Green
+12	Blue
+13	Purple or Violet
+14	Gray
+15	White
+SIZE
+4	Large(16-32 in)
+3	Medium(9-16 in)
+2	Small(5-9 in)
+5	Very Large(32-72 in)
+1	Very Small(3-5in)
+*/
+
