@@ -100,6 +100,7 @@ SIZE
 2	Small(5-9 in)
 5	Very Large(32-72 in)
 1	Very Small(3-5in)
+BIRDCOLORID PRIMARYCOLOR  SECONDARYCOLOR
 1	1	1
 2	1	2
 3	1	3
