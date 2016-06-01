@@ -34,7 +34,7 @@ public class BirdGUI extends JFrame {
     private JScrollPane jscroll = new JScrollPane();
     private StringBuilder namesBirdIsKnownBy;
     private Bird bird;
-    private int numberOfNames;
+
     /**
      * Create application GUI.
      *
@@ -50,7 +50,7 @@ public class BirdGUI extends JFrame {
         this.bird = bird;
         for (BirdName currentName : bird.getNames()) {
             namesBirdIsKnownBy.append(currentName.getName());
-            switch(currentName.getGender()) {
+            switch (currentName.getGender()) {
                 case 'f':
                 case 'F':
                     namesBirdIsKnownBy.append("(Female)");
@@ -60,7 +60,7 @@ public class BirdGUI extends JFrame {
                     namesBirdIsKnownBy.append("(Male)");
                     break;
             }
-            namesBirdIsKnownBy.append(", "); 
+            namesBirdIsKnownBy.append(", ");
         }
         initComponents();
     }
@@ -151,10 +151,13 @@ public class BirdGUI extends JFrame {
     }
 
     class SoundAction implements ActionListener {
+
         private final int nameId;
-        SoundAction(int nameId){
+
+        SoundAction(int nameId) {
             this.nameId = nameId;
         }
+
         @Override
         public void actionPerformed(ActionEvent e) {
             try {

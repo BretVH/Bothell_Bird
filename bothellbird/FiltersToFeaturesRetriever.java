@@ -25,16 +25,6 @@ public class FiltersToFeaturesRetriever {
         "SELECT * FROM BirdDatabase.dbo.Locations"
     };
 
-    private static final String[] features = {
-        "Type of Bird",
-        "Secondary Colors",
-        "Primary Colors",
-        "Habitats",
-        "Conservation Status",
-        "Size",
-        "Location"
-    };
-
     private static final String[] tableNames = {
         "Family",
         "SecondaryColor",
@@ -80,8 +70,6 @@ public class FiltersToFeaturesRetriever {
         return filterToSelectableFeature;
     }
 
-
-
     private static List<Feature> getFamilies(String tn, int i, String q) throws SQLException {
         return getFeatureList(tn, q, "familyName", "familyNameId");
     }
@@ -109,13 +97,14 @@ public class FiltersToFeaturesRetriever {
     private static List<Feature> getLocations(String tn, int i, String q) throws SQLException {
         return getFeatureList(tn, q, "location", "locationId");
     }
+
     private static List<Feature> getFeatureList(String tn, String q, String n, String id) throws SQLException {
         int count = SqlUtilities.getFeatureCount(tn);
         List<Feature> featureList = new ArrayList<>();
         Connection conn = SimpleDataSource.getconnection();
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery(q);
-        for(int i = 0; i < count; i++){
+        for (int i = 0; i < count; i++) {
             int fId = rs.getInt(id);
             String name = rs.getString(n);
             Feature feature = new Feature(fId, name);

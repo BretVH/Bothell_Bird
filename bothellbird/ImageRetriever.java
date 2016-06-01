@@ -12,7 +12,7 @@ import javax.swing.ImageIcon;
 
 public class ImageRetriever {
 
-    private static final FileMaker maker = new FileMaker();;
+    private static final FileMaker maker = new FileMaker();
     private static ImageIcon myIcon;
 
     public static ImageIcon readData(int ID, int nameId) throws SQLException, IOException {

@@ -32,7 +32,6 @@ class MakeSound {
      */
     public static void playSound(File soundFile) {
 
-
         try {
             AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundFile);
             AudioFormat audioFormat = audioStream.getFormat();

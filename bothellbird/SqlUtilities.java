@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package bothell_bird;
 
 import java.sql.Connection;
@@ -16,7 +15,8 @@ import java.sql.Statement;
  * @author Bret
  */
 public class SqlUtilities {
-        public static int getFeatureCount(String tn) throws SQLException {
+
+    public static int getFeatureCount(String tn) throws SQLException {
         String countQuery = "SELECT COUNT(*) FROM BirdDatabase.dbo." + tn;
         Connection conn = SimpleDataSource.getconnection();
         Statement stat = conn.createStatement();

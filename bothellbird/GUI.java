@@ -306,8 +306,8 @@ public class GUI extends JFrame {
                 Bird selectedBird;
                 for (BirdName name : birdNames) {
                     if (name.getBirdId() == birdNameToBirdIdMap.get(birdName)) {
-                        for(Bird bird : birds) {
-                            if(bird.getBirdId() == name.getBirdId()){
+                        for (Bird bird : birds) {
+                            if (bird.getBirdId() == name.getBirdId()) {
                                 selectedBird = bird;
                                 try {
                                     displayBirdGUI(selectedBird);
@@ -364,7 +364,7 @@ public class GUI extends JFrame {
                 }
             }
             if (birdId != 0) {
-                
+
             }
         }
     }
@@ -385,10 +385,6 @@ public class GUI extends JFrame {
         //next button is only created after createFeaturesJList
         //completes...can refactor later...for now assume
         //that is always the case...
-        /*filterToFeatures = FiltersToFeaturesRetriever.getFilterToFeaturesMap();
-        String[] filters = getFilters();
-        List<Feature> features = filterToFeatures.get(filters[filterIndex]);
-        int[] featureIds = getFeatureIds(features);*/
         private final String[] filters;
         private int filterIndex;
         private final int[] featureIds;
@@ -402,7 +398,7 @@ public class GUI extends JFrame {
         }
 
         @Override
-        public void actionPerformed(ActionEvent e)  {
+        public void actionPerformed(ActionEvent e) {
             if (filterIndex >= filters.length - 1) {
                 imagePanel.removeAll();
                 imagePanel.add(defaultPicture);
@@ -410,23 +406,23 @@ public class GUI extends JFrame {
                 filterIndex = 0;
                 hasAdded = false;
             } else {
-                    int selectedFeatureIndex = selectableFeaturesJList.getSelectedIndex() + 1;
+                int selectedFeatureIndex = selectableFeaturesJList.getSelectedIndex() + 1;
 
-                    updatedBirdData = filterBirds(selectedFeatureIndex, filters[filterIndex]);
+                updatedBirdData = filterBirds(selectedFeatureIndex, filters[filterIndex]);
 
-                    if (!hasAdded) {
-                        updateBirdSetAndGetUpdatedBirdsList();
-                    } else {
-                        removeFilteredBirds();
-                    }
+                if (!hasAdded) {
+                    updateBirdSetAndGetUpdatedBirdsList();
+                } else {
+                    removeFilteredBirds();
+                }
 
-                    birdsJList.removeAll();
+                birdsJList.removeAll();
                 try {
                     updateJList(birds);
                 } catch (IOException | SQLException ex) {
                     Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                    hasAdded = true;
+                hasAdded = true;
                 try {
                     createFeaturesJList(filterIndex + 1);
                 } catch (SQLException ex) {
@@ -470,30 +466,30 @@ public class GUI extends JFrame {
         }
 
         private ArrayList<Bird> filterBirds(int featureId, String filter) {
-            switch(filter) {
-                  case "Family":
-                      return filterByFamily(featureId);
-                  case "SecondaryColor":
-                      return filterBySecondaryColor(featureId);
-                  case "PrimaryColors":
-                      return filterByPrimaryColor(featureId);
-                  case "Habitats":
-                      return filterByHabitat(featureId);
-                  case "ConservationStatus":
-                      return filterByConservationStatus(featureId);
-                  case "Size":
-                      return filterBySize(featureId);
-                  case "Locations":
-                      return filterByLocation(featureId);
-                  default:
-                      return null;
+            switch (filter) {
+                case "Family":
+                    return filterByFamily(featureId);
+                case "SecondaryColor":
+                    return filterBySecondaryColor(featureId);
+                case "PrimaryColors":
+                    return filterByPrimaryColor(featureId);
+                case "Habitats":
+                    return filterByHabitat(featureId);
+                case "ConservationStatus":
+                    return filterByConservationStatus(featureId);
+                case "Size":
+                    return filterBySize(featureId);
+                case "Locations":
+                    return filterByLocation(featureId);
+                default:
+                    return null;
             }
         }
 
         private ArrayList<Bird> filterByFamily(int featureId) {
             ArrayList<Bird> remainingBirds = new ArrayList<>();
-            for(Bird bird : birds) {
-                if(bird.getFamilyNameId() == featureId){
+            for (Bird bird : birds) {
+                if (bird.getFamilyNameId() == featureId) {
                     remainingBirds.add(bird);
                 }
             }
@@ -502,8 +498,8 @@ public class GUI extends JFrame {
 
         private ArrayList<Bird> filterBySecondaryColor(int featureId) {
             ArrayList<Bird> remainingBirds = new ArrayList<>();
-            for(Bird bird : birds) {
-                if(bird.getSecondaryColors().contains(featureId)){
+            for (Bird bird : birds) {
+                if (bird.getSecondaryColors().contains(featureId)) {
                     remainingBirds.add(bird);
                 }
             }
@@ -512,8 +508,8 @@ public class GUI extends JFrame {
 
         private ArrayList<Bird> filterByPrimaryColor(int featureId) {
             ArrayList<Bird> remainingBirds = new ArrayList<>();
-            for(Bird bird : birds) {
-                if(bird.getPrimaryColors().contains(featureId)){
+            for (Bird bird : birds) {
+                if (bird.getPrimaryColors().contains(featureId)) {
                     remainingBirds.add(bird);
                 }
             }
@@ -522,8 +518,8 @@ public class GUI extends JFrame {
 
         private ArrayList<Bird> filterByHabitat(int featureId) {
             ArrayList<Bird> remainingBirds = new ArrayList<>();
-            for(Bird bird : birds) {
-                if(bird.getHabitats().contains(featureId)){
+            for (Bird bird : birds) {
+                if (bird.getHabitats().contains(featureId)) {
                     remainingBirds.add(bird);
                 }
             }
@@ -531,9 +527,9 @@ public class GUI extends JFrame {
         }
 
         private ArrayList<Bird> filterByConservationStatus(int featureId) {
-                  ArrayList<Bird> remainingBirds = new ArrayList<>();
-            for(Bird bird : birds) {
-                if(bird.getConservationStatusId() == featureId) {
+            ArrayList<Bird> remainingBirds = new ArrayList<>();
+            for (Bird bird : birds) {
+                if (bird.getConservationStatusId() == featureId) {
                     remainingBirds.add(bird);
                 }
             }
@@ -541,9 +537,9 @@ public class GUI extends JFrame {
         }
 
         private ArrayList<Bird> filterBySize(int featureId) {
-                        ArrayList<Bird> remainingBirds = new ArrayList<>();
-            for(Bird bird : birds) {
-                if(bird.getSizeId() == featureId) {
+            ArrayList<Bird> remainingBirds = new ArrayList<>();
+            for (Bird bird : birds) {
+                if (bird.getSizeId() == featureId) {
                     remainingBirds.add(bird);
                 }
             }
@@ -552,8 +548,8 @@ public class GUI extends JFrame {
 
         private ArrayList<Bird> filterByLocation(int featureId) {
             ArrayList<Bird> remainingBirds = new ArrayList<>();
-            for(Bird bird : birds) {
-                if(bird.getHabitats().contains(featureId)){
+            for (Bird bird : birds) {
+                if (bird.getHabitats().contains(featureId)) {
                     remainingBirds.add(bird);
                 }
             }

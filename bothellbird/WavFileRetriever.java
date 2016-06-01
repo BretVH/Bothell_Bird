@@ -12,7 +12,7 @@ public class WavFileRetriever {
         FileMaker maker = new FileMaker();
         File myFile = null;
         Connection conn = SimpleDataSource.getconnection();
-        Statement stat =  conn.createStatement();
+        Statement stat = conn.createStatement();
         //get database table
         String query = "SELECT [hasMaleSound], [hasFemaleSound], [hasAmbiguousSound] FROM"
                 + " BirdDatabase.dbo.Files where uniqueBirdID = '" + ID + "'";

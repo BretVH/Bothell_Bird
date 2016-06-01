@@ -41,15 +41,14 @@ public class ListRenderer extends DefaultListCellRenderer {
         }
         String name = "";
         //Set the icon and text.  If icon was null, say so.
-        String birdId = birdIdToBirdNameMap.get((int)birdIdObject);
+        String birdId = birdIdToBirdNameMap.get((int) birdIdObject);
         image = icons.get(birdId);
         setIcon(image);
         if (image != null) {
-            setText(birdIdToBirdNameMap.get((int)birdIdObject));
+            setText(birdIdToBirdNameMap.get((int) birdIdObject));
         } else {
             setText(name + " (no image available)");
         }
-
         return this;
     }
 }
