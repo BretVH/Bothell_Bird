@@ -38,17 +38,18 @@ public class BirdGUI extends JFrame {
     private JScrollPane jscroll = new JScrollPane();
     private String namesBirdIsKnownBy = "Bird Names: ";
     private LinkedHashMap<String, String> birdIdToGenderSpecificNameMap;
-
+    private Bird bird;
     /**
      * Create application GUI.
      *
      * @param birdId
      * @param commonNames
      */
-    public BirdGUI(int birdId, ArrayList<String> commonNames) {
-        this.birdId = birdId;
-        for (String currentName : commonNames) {
-            namesBirdIsKnownBy += currentName + ", ";
+    public BirdGUI(Bird bird) {
+        this.bird = bird;
+        this.birdId = bird.getBirdId();
+        for (BirdName currentName : bird.getNames()) {
+            namesBirdIsKnownBy += currentName.getName() + ", ";
         }
         try {
             initComponents();
@@ -80,16 +81,17 @@ public class BirdGUI extends JFrame {
         this.dispose();
     }
 
-    private List<String> getAliases() throws SQLException {
-        birdIdToGenderSpecificNameMap = GenderRetriever.getGender(birdId);
-        Collection<String> birdAliases = birdIdToGenderSpecificNameMap.keySet();
-        List<String> commonNames = new ArrayList<>();
-        commonNames.addAll(birdAliases);
-        return commonNames;
+    private Iterable<String> getAliases()  {
+        Iterable<BirdName> names = bird.getNames();
+        ArrayList<String> aliases = new ArrayList<>();
+        for(BirdName name : names) {
+            aliases.add(name.getName());
+        }
+        return aliases;
     }
 
-    private String getDescriptionText() throws SQLException {
-        return DescriptionRetriever.getDescription(birdId);
+    private String getDescriptionText() {
+        return bird.toString();
     }
 
     private void setBirdDescription(String description) {
@@ -112,7 +114,7 @@ public class BirdGUI extends JFrame {
         List<JLabel> birdPicButtonLabels = new ArrayList<>();
         List<String> birdPicButtonLabelsText;
         birdPicButtonLabelsText = new ArrayList<>();
-        String scientificName = BirdsListRetriever.getScientificName(birdId);
+        String scientificName = bird.getName();
         birdPicButtonLabelsText.add(this.namesBirdIsKnownBy + " Bird Species: " + scientificName);
         int numberOfNames = ((List<String>) commonNames).size();
         birdPicButtons = new JButton[numberOfNames];
@@ -145,8 +147,8 @@ public class BirdGUI extends JFrame {
         }
     }
 
-    private void makeButton(int counter, StringBuilder aliases, List<JLabel> birdPicButtonLabels, List<String> birdPicButtonLabelsText) throws SQLException, IOException {
-        image = ImageRetriever.bigImage(birdId, GenderRetriever.getNameId(birdId, aliases.toString()));
+    private void makeButton(int counter, StringBuilder aliases, List<JLabel> birdPicButtonLabels, List<String> birdPicButtonLabelsText) {
+        image = ImageRetriever.bigImage(birdId, );
         birdPicButtonLabelsText.add(aliases.toString());
         birdPicButtonLabels.add(new JLabel(birdPicButtonLabelsText.get(counter)));
         birdGUIMainPanel.add(birdPicButtonLabels.get(counter));
