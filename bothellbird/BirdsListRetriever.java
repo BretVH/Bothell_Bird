@@ -1,5 +1,6 @@
 package bothell_bird;
 
+import java.io.IOException;
 import java.sql.*;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -17,7 +18,7 @@ public class BirdsListRetriever {
      * @return list of birds
      * @throws SQLException
      */
-    public static Set<Bird> getBirdsList() throws SQLException {
+    public static Set<Bird> getBirdsList() throws SQLException, IOException {
         int i = SqlUtilities.getFeatureCount("uniqueBirds");
         birds = new LinkedHashSet<>();
         Connection conn = SimpleDataSource.getconnection();

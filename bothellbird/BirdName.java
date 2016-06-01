@@ -10,6 +10,7 @@ package bothell_bird;
  *
  * @author Bret
  */
+//TODO: implement Comparable, override equals, hashCode, toString
 public class BirdName {
     private final char gender;
     private final String name;
