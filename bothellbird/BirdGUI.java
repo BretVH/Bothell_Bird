@@ -51,15 +51,10 @@ public class BirdGUI extends JFrame {
             namesBirdIsKnownBy += currentName + ", ";
         }
         try {
-            try {
-                initComponents();
-            } catch (IOException ex) {
-                Logger.getLogger(BirdGUI.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        } catch (SQLException ex) {
+            initComponents();
+        } catch (IOException | SQLException ex) {
             Logger.getLogger(BirdGUI.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
+        } 
     }
 
     private void initComponents() throws SQLException, IOException {
@@ -117,15 +112,13 @@ public class BirdGUI extends JFrame {
         List<JLabel> birdPicButtonLabels = new ArrayList<>();
         List<String> birdPicButtonLabelsText;
         birdPicButtonLabelsText = new ArrayList<>();
-        String scientificName = BirdNameRetriever.getScientificName(birdId);
+        String scientificName = BirdsListRetriever.getScientificName(birdId);
         birdPicButtonLabelsText.add(this.namesBirdIsKnownBy + " Bird Species: " + scientificName);
         int numberOfNames = ((List<String>) commonNames).size();
         birdPicButtons = new JButton[numberOfNames];
         ActionListener soundActionListener = new SoundAction();
 
         int counter = 0;
-
-        
 
         for (String name : commonNames) {
             String genderSpecificName = birdIdToGenderSpecificNameMap.get(name);
@@ -152,8 +145,6 @@ public class BirdGUI extends JFrame {
         }
     }
 
-
-
     private void makeButton(int counter, StringBuilder aliases, List<JLabel> birdPicButtonLabels, List<String> birdPicButtonLabelsText) throws SQLException, IOException {
         image = ImageRetriever.bigImage(birdId, GenderRetriever.getNameId(birdId, aliases.toString()));
         birdPicButtonLabelsText.add(aliases.toString());
@@ -162,7 +153,6 @@ public class BirdGUI extends JFrame {
         birdPicButtons[counter].setIcon(image);
         birdGUIMainPanel.add(birdPicButtons[counter]);
     }
-
 
     class SoundAction implements ActionListener {
 
