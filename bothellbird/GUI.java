@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -56,8 +57,8 @@ public class GUI extends JFrame {
     private JPanel listPanel;
     private ImageIcon pic;
     private ArrayList<ImageIcon> birdIcons;
-    private ArrayList<BirdInfo> birdNames;
-    private ArrayList<BirdInfo> updatedBirdData;
+    private ArrayList<BirdName> birdNames;
+    private ArrayList<Bird> updatedBirdData;
     private JPanel searchPanel;
     private JPanel imagePanel;
     private JButton searchByFeatures;
@@ -65,7 +66,7 @@ public class GUI extends JFrame {
     private JPanel buttonPanel;
     private JButton displayBird;
     private Map<Integer, String> birdIdToBirdName;
-    private Set<BirdInfo> birds;
+    private Set<Bird> birds;
     private ListCellRenderer lr;
     private boolean hasAdded = false;
     private ActionListener listener;
@@ -74,7 +75,7 @@ public class GUI extends JFrame {
     private JLabel defaultPicture;
     private JList<String> selectableFeaturesJList = new JList<>();
     private final DefaultListModel<String> jListModel;
-    private Map<String, ArrayList<String>> featureToSelectableFeatureMap;
+    private Map<String, List<Feature>> filterToFeatures;
     private final HashMap<String, Integer> birdNameToBirdIdMap;
 
     /**
@@ -82,12 +83,19 @@ public class GUI extends JFrame {
      */
     public GUI() throws HeadlessException {
         this.birdNameToBirdIdMap = new HashMap<>();
-        this.featureToSelectableFeatureMap = new HashMap<>();
+        this.filterToFeatures = new HashMap<>();
         this.jListModel = new DefaultListModel<>();
         this.featuresJlistJLabel = new JLabel();
         this.birds = new LinkedHashSet<>();
         setVisible(true);
-        populateBirdNameToBirdIdMap();
+        try {
+            populateBirdNameToBirdIdMap();
+        } catch (SQLException ex) {
+            Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+                 JOptionPane.showMessageDialog(null, "Can't connect to database!",
+                    "", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Using offline data");
+        }
         GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
         this.setExtendedState(this.getExtendedState() | this.MAXIMIZED_BOTH);
         setName("BothellBirder \u00a9 Bret Van Hof");
@@ -104,45 +112,36 @@ public class GUI extends JFrame {
     }
 
     private String[] getFeatureNames() {
-        String[] featureNames = new String[featureToSelectableFeatureMap.size()];
+        String[] featureNames = new String[filterToFeatures.size()];
         int z = 0;
-        for (Map.Entry<String, ArrayList<String>> entry : featureToSelectableFeatureMap.entrySet()) {
+        for (Map.Entry<String, List<Feature>> entry : filterToFeatures.entrySet()) {
             featureNames[z] = entry.getKey();
             z++;
         }
         return featureNames;
     }
 
-    private int[] getFeatureIds(ArrayList<String> selectedFeature) {
-        //selectedFeature is a list of feature names followed by...
-        //feature ids,  we only want the ids...needs refactored
-        int arraySize = (selectedFeature.size() / 2) + 1;
+    private int[] getFeatureIds(List<Feature> selectedFeature) {
+        int arraySize = selectedFeature.size();
         int[] featureIDs = new int[arraySize];
         int counter = 0;
         //get ids.
-        for (int g = 1; g < featureIDs.length; g += 2) {
-            int featureID = Integer.parseInt(selectedFeature.get(g));
-            featureIDs[counter] = featureID;
+        for(Feature feature : selectedFeature) {
+            featureIDs[counter] = feature.getFeatureId();
             counter++;
         }
         return featureIDs;
     }
 
-    private void populateBirdNameToBirdIdMap() {
-        birdNames = new ArrayList<>();
+    private void populateBirdNameToBirdIdMap() throws SQLException {
         birdIcons = new ArrayList<>();
 
-        try {
-            birdNames = BirdNameRetriever.readData();
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Can't connect to database!",
-                    "", JOptionPane.WARNING_MESSAGE);
-            JOptionPane.showMessageDialog(null, "Using offline data");
-            BirdInfo bird = new BirdInfo("CondorMan", 0, 0);
-            birdNames.add(bird);
-        }
-        for (BirdInfo birdInfo : birdNames) {
-            birdNameToBirdIdMap.put(birdInfo.getName(), birdInfo.getBirdId());
+            birds = BirdsListRetriever.getBirdsList();
+            for(Bird bird : birds)
+                birdNames = BirdNamesRetriever.getAliasList(bird.getBirdId());
+ 
+        for (BirdName name : birdNames) {
+            birdNameToBirdIdMap.put(name.getName(), name.getBirdId());
         }
     }
 
@@ -152,21 +151,14 @@ public class GUI extends JFrame {
     }
 
     private void createFeaturesJList(int selectedFeaturesIndex) throws SQLException {
-        featureToSelectableFeatureMap = DescriptionRetriever.getFeatures();
+        filterToFeatures = FiltersToFeaturesRetriever.getFilterToFeaturesMap();
         String[] featureNames = getFeatureNames();
-        ArrayList<String> selectedFeature = featureToSelectableFeatureMap.get(featureNames[selectedFeaturesIndex]);
+        List<Feature> selectedFeature = filterToFeatures.get(featureNames[selectedFeaturesIndex]);
         int[] featureIds = getFeatureIds(selectedFeature);
-        //remove ids from selected features, leave only names....
-        ///Description retriever needs refactored...featureToSelctableFeatureMap
-        //Should be a Map to BirdFeature objects and a BirdFeature class
-        //should be introduced...
-        for (int index = 0; index < selectedFeature.size() - 1; index++) {
-            selectedFeature.remove(index + 1);
-        }
-        int i = 0;
         jListModel.clear();
-        for (String featureName : selectedFeature) {
-            jListModel.add(i, featureName);
+        int i = 0;
+        for (Feature feature : selectedFeature) {
+            jListModel.add(i, feature.getFeatureName());
             i++;
         }
         selectableFeaturesJList = new JList<>((String[]) selectedFeature.toArray());
@@ -195,7 +187,7 @@ public class GUI extends JFrame {
         createButtons();
         addButtonsToPanels();
         createSearchBox();
-        createJList(birdNames);
+        createJList(birds);
     }
 
     private void createSearchBox() {
@@ -234,13 +226,13 @@ public class GUI extends JFrame {
         resetList.addActionListener(resetListener);
     }
 
-    private void updateJList(ArrayList<BirdInfo> listOfBirds) throws IOException, SQLException {
+    private void updateJList(Set<Bird> listOfBirds) throws IOException, SQLException {
         createJList(listOfBirds);
         listPanel.revalidate();
         getContentPane().revalidate();
     }
 
-    private void createJList(ArrayList<BirdInfo> listOfBirds) throws IOException, SQLException {
+    private void createJList(Set<Bird> listOfBirds) throws IOException, SQLException {
         Map<String, ImageIcon> birdNameToBirdIconMap = getInitJListData();
         Integer[] birdIds = getBirdIds(listOfBirds);
         listPanel.removeAll();
@@ -261,8 +253,8 @@ public class GUI extends JFrame {
         ImageIcon test = new ImageIcon("0a0.jpg");
         birdIdToBirdName = new HashMap<>();
         int index = 0;
-        for (BirdInfo name : birdNames) {
-            birdIcons.add(ImageRetriever.readData(name.getBirdId(), name.getNameId()));
+        for (Bird bird : birds) {
+            birdIcons.add(ImageRetriever.readData(bird.getBirdId(), name.getNameId()));
             birdNameToBirdIconMap.put(name.getName(), birdIcons.get(index));
             birdIdToBirdName.put(name.getNameId(), name.getName());
             index++;
@@ -281,11 +273,11 @@ public class GUI extends JFrame {
         return birdsJList;
     }
 
-    private Integer[] getBirdIds(ArrayList<BirdInfo> birdNames) {
+    private Integer[] getBirdIds(Set<Bird> birds) {
         Integer[] birdIds = new Integer[birdNames.size()];
         int count = 0;
-        for (BirdInfo ID : birdNames) {
-            birdIds[count] = (int) ID.getNameId();
+        for (Bird ID : birds) {
+            birdIds[count] = (int) ID.getBirdId();
             count++;
         }
         return birdIds;
@@ -314,7 +306,7 @@ public class GUI extends JFrame {
             if (birdNameToBirdIdMap.get(birdName) != null) {
                 int birdId = birdNameToBirdIdMap.get(birdName);
                 ArrayList<String> names = new ArrayList<>();
-                for (BirdInfo aName : birdNames) {
+                for (Bird aName : birdNames) {
                     if (aName.getBirdId() == birdNameToBirdIdMap.get(birdName)) {
                         names.add(aName.getName());
                     }
@@ -349,13 +341,13 @@ public class GUI extends JFrame {
             int birdId = 0;
             String name = "";
             ArrayList<String> names = new ArrayList<>();
-            for (BirdInfo birdName : birdNames) {
+            for (Bird birdName : birdNames) {
                 if (birdName.getNameId() == (Integer) birdsJList.getSelectedValue()) {
                     birdId = birdName.getBirdId();
                     name = birdName.getName();
                 }
             }
-            for (BirdInfo aName : birdNames) {
+            for (Bird aName : birdNames) {
                 if (aName.getBirdId() == birdId) {
                     names.add(aName.getName());
                 }
@@ -400,10 +392,10 @@ public class GUI extends JFrame {
                 hasAdded = false;
             } else {
                 try {
-                    int featureId = BirdNameRetriever.getFeatureID(featureNames[theIndexOfTheCurrentFeature]);
+                    int featureId = BirdsListRetriever.getFeatureID(featureNames[theIndexOfTheCurrentFeature]);
                     int featureIndex = selectableFeaturesJList.getSelectedIndex() + 1;
 
-                    updatedBirdData = BirdNameRetriever.updateData(featureId, featureIndex);
+                    updatedBirdData = BirdsListRetriever.updateData(featureId, featureIndex);
 
                     if (!hasAdded) {
                         updateBirdSetAndGetUpdatedBirdsList();
@@ -412,7 +404,7 @@ public class GUI extends JFrame {
                     }
 
                     birdsJList.removeAll();
-                    ArrayList<BirdInfo> updatedList = new ArrayList<>();
+                    ArrayList<Bird> updatedList = new ArrayList<>();
                     updatedList.addAll(birds);
                     updateJList(updatedList);
                     hasAdded = true;
@@ -427,7 +419,7 @@ public class GUI extends JFrame {
         private void updateBirdSetAndGetUpdatedBirdsList() {
             birds = new LinkedHashSet<>(updatedBirdData);
             hasAdded = true;
-            ArrayList<BirdInfo> updatedList;
+            ArrayList<Bird> updatedList;
             updatedList = new ArrayList<>();
             updatedList.addAll(birds);
         }
@@ -435,9 +427,9 @@ public class GUI extends JFrame {
         private void removeFilteredBirds() {
             //make array big enough to hold all birds incase they
             //are all filtered out.
-            BirdInfo[] fileteredBirds = new BirdInfo[birds.size()];
+            Bird[] fileteredBirds = new Bird[birds.size()];
             int numberOfFilteredBirds = 0;
-            for (BirdInfo bird : birds) {
+            for (Bird bird : birds) {
                 boolean stillExists = false;
                             //could sort then use binary search...if this gets
                 //large...

@@ -1,11 +1,12 @@
 package bothell_bird;
 
 import java.sql.*;
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class BirdsListRetriever {
 
-    private static ArrayList<Bird> birds;
+    private static Set<Bird> birds;
     //get database table
     private static final String getBirdInfoQuery = "SELECT [uniqueBirdId], "
             + "[ScientificName], [sizeIdId], [familyNameId], "
@@ -16,9 +17,9 @@ public class BirdsListRetriever {
      * @return list of birds
      * @throws SQLException
      */
-    public static ArrayList<Bird> readData() throws SQLException {
+    public static Set<Bird> getBirdsList() throws SQLException {
         int i = SqlUtilities.getFeatureCount("uniqueBirds");
-        birds = new ArrayList<>();
+        birds = new LinkedHashSet<>();
         Connection conn = SimpleDataSource.getconnection();
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery(getBirdInfoQuery);
