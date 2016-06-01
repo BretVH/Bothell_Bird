@@ -58,7 +58,7 @@ public class GUI extends JFrame {
     private JPanel listPanel;
     private ImageIcon pic;
     private ArrayList<ImageIcon> birdIcons;
-    private ArrayList<BirdName> birdNames;
+    private Iterable<BirdName> birdNames;
     private ArrayList<Bird> updatedBirdData;
     private JPanel searchPanel;
     private JPanel imagePanel;
@@ -140,11 +140,7 @@ public class GUI extends JFrame {
 
         birds = BirdsListRetriever.getBirdsList();
         for (Bird bird : birds) {
-            birdNames = BirdNamesRetriever.getAliasList(bird.getBirdId());
-        }
-
-        for (BirdName name : birdNames) {
-            birdNameToBirdIdMap.put(name.getName(), name.getBirdId());
+            birdNames = bird.getNames();
         }
     }
 
@@ -277,10 +273,10 @@ public class GUI extends JFrame {
     }
 
     private Integer[] getBirdIds(Set<Bird> birds) {
-        Integer[] birdIds = new Integer[birdNames.size()];
+        Integer[] birdIds = new Integer[birds.size()];
         int count = 0;
-        for (Bird ID : birds) {
-            birdIds[count] = ID.getBirdId();
+        for (Bird bird : birds) {
+            birdIds[count] = bird.getBirdId();
             count++;
         }
         return birdIds;
@@ -293,10 +289,10 @@ public class GUI extends JFrame {
         buttonPanel.add(displayBird);
     }
 
-    private void displayBirdGUI(Bird bird) {
+    private void displayBirdGUI(Bird bird) throws SQLException, IOException {
         JFrame display = new BirdGUI(bird);
         display.setVisible(true);
-        setName(name + " \u00a9 Bret Van Hof");
+        setName(bird.getName() + " \u00a9 Bret Van Hof");
         display.setBounds(30, 30, 800, 600);
         display.toFront();
     }
@@ -307,22 +303,23 @@ public class GUI extends JFrame {
         public void actionPerformed(ActionEvent e) {
             String birdName = searchBox.getText();
             if (birdNameToBirdIdMap.get(birdName) != null) {
-                int birdId = birdNameToBirdIdMap.get(birdName);
                 Bird selectedBird;
                 for (BirdName name : birdNames) {
                     if (name.getBirdId() == birdNameToBirdIdMap.get(birdName)) {
                         for(Bird bird : birds) {
                             if(bird.getBirdId() == name.getBirdId()){
                                 selectedBird = bird;
+                                try {
+                                    displayBirdGUI(selectedBird);
+                                } catch (SQLException | IOException ex) {
+                                    Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+                                }
                                 break;
                             }
                         }
                         break;
                     }
                 }
-                //this seems wonky and I should probably be passing a
-                //Bird into the constructor...will look into this..
-                displayBirdGUI(selectedBird);
             } else {
                 JOptionPane.showMessageDialog(null, "Bird Not Found!",
                         "", JOptionPane.WARNING_MESSAGE);
@@ -335,7 +332,11 @@ public class GUI extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             listPanel.removeAll();
-            createJList(birdNames);
+            try {
+                createJList(BirdsListRetriever.getBirdsList());
+            } catch (IOException | SQLException ex) {
+                Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+            }
             hasAdded = false;
             listPanel.revalidate();
         }
@@ -353,14 +354,17 @@ public class GUI extends JFrame {
                 }
             }
             //inefficient sort/search
-            Bird displayBird;
             for (Bird bird : birds) {
                 if (bird.getBirdId() == birdId) {
-                    displayBird = bird;
+                    try {
+                        displayBirdGUI(bird);
+                    } catch (SQLException | IOException ex) {
+                        Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             }
             if (birdId != 0) {
-                displayBirdGUI(bird);
+                
             }
         }
     }
@@ -406,10 +410,9 @@ public class GUI extends JFrame {
                 filterIndex = 0;
                 hasAdded = false;
             } else {
-                    int featureId = features.get(filterIndex).getFeatureId();
                     int selectedFeatureIndex = selectableFeaturesJList.getSelectedIndex() + 1;
 
-                    updatedBirdData = filterBirds(featureId, filters[filterIndex]);
+                    updatedBirdData = filterBirds(selectedFeatureIndex, filters[filterIndex]);
 
                     if (!hasAdded) {
                         updateBirdSetAndGetUpdatedBirdsList();
@@ -418,9 +421,11 @@ public class GUI extends JFrame {
                     }
 
                     birdsJList.removeAll();
-                    ArrayList<Bird> updatedList = new ArrayList<>();
-                    updatedList.addAll(birds);
-                    updateJList(updatedList);
+                try {
+                    updateJList(birds);
+                } catch (IOException | SQLException ex) {
+                    Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
                     hasAdded = true;
                 try {
                     createFeaturesJList(filterIndex + 1);

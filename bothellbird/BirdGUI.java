@@ -8,8 +8,6 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,65 +27,63 @@ public class BirdGUI extends JFrame {
     private static final long serialVersionUID = 7801651004788925924L;
     private JPanel birdGUIMainPanel;
     private JPanel birdDescriptionPanel;
-    private JPanel controlsPanel;
+    private JPanel controlPanel;
     private JTextArea birdDescriptionTextArea;
     private JButton[] birdPicButtons;
-    private final int birdId;
-    private ImageIcon image;
     private JButton back;
     private JScrollPane jscroll = new JScrollPane();
-    private String namesBirdIsKnownBy = "Bird Names: ";
-    private LinkedHashMap<String, String> birdIdToGenderSpecificNameMap;
+    private StringBuilder namesBirdIsKnownBy;
     private Bird bird;
+    private int numberOfNames;
     /**
      * Create application GUI.
      *
-     * @param birdId
-     * @param commonNames
+     * @param bird
+     * @throws java.sql.SQLException
+     * @throws java.io.IOException
      */
-    public BirdGUI(Bird bird) {
+    public BirdGUI(Bird bird) throws SQLException, IOException {
+        namesBirdIsKnownBy = new StringBuilder();
+        namesBirdIsKnownBy.append("Species: ");
+        namesBirdIsKnownBy.append(bird.getName());
+        namesBirdIsKnownBy.append(". Common Names: ");
         this.bird = bird;
-        this.birdId = bird.getBirdId();
         for (BirdName currentName : bird.getNames()) {
-            namesBirdIsKnownBy += currentName.getName() + ", ";
+            namesBirdIsKnownBy.append(currentName.getName());
+            switch(currentName.getGender()) {
+                case 'f':
+                case 'F':
+                    namesBirdIsKnownBy.append("(Female)");
+                    break;
+                case 'm':
+                case 'M':
+                    namesBirdIsKnownBy.append("(Male)");
+                    break;
+            }
+            namesBirdIsKnownBy.append(", "); 
         }
-        try {
-            initComponents();
-        } catch (IOException | SQLException ex) {
-            Logger.getLogger(BirdGUI.class.getName()).log(Level.SEVERE, null, ex);
-        } 
+        initComponents();
     }
 
     private void initComponents() throws SQLException, IOException {
         birdGUIMainPanel = new JPanel();
         birdGUIMainPanel.setLayout(new GridLayout());
         birdDescriptionPanel = new JPanel();
-        controlsPanel = new JPanel();
+        controlPanel = new JPanel();
         birdDescriptionTextArea = new JTextArea();
-
-        Iterable<String> commonNames = getAliases();
         String birdDescription = getDescriptionText();
         setBirdDescription(birdDescription);
         revalidate();
-        populateBirdPicButtons(commonNames);
+        populateBirdPicButtons();
         initControlsPanel();
         this.setLayout(new BorderLayout());
-        this.add(controlsPanel, BorderLayout.NORTH);
+        this.add(controlPanel, BorderLayout.NORTH);
         this.add(birdGUIMainPanel, BorderLayout.CENTER);
         this.add(birdDescriptionPanel, BorderLayout.SOUTH);
     }
 
     public void disposer() {
         this.dispose();
-    }
-
-    private Iterable<String> getAliases()  {
-        Iterable<BirdName> names = bird.getNames();
-        ArrayList<String> aliases = new ArrayList<>();
-        for(BirdName name : names) {
-            aliases.add(name.getName());
-        }
-        return aliases;
     }
 
     private String getDescriptionText() {
@@ -107,39 +103,37 @@ public class BirdGUI extends JFrame {
         back = new JButton("Close Bird display and return to Bothell Bird");
         ActionListener close = new closeAction();
         back.addActionListener(close);
-        controlsPanel.add(back);
+        controlPanel.add(back);
     }
 
-    private void populateBirdPicButtons(Iterable<String> commonNames) throws SQLException, IOException {
+    private void populateBirdPicButtons() throws SQLException, IOException {
         List<JLabel> birdPicButtonLabels = new ArrayList<>();
         List<String> birdPicButtonLabelsText;
         birdPicButtonLabelsText = new ArrayList<>();
-        String scientificName = bird.getName();
-        birdPicButtonLabelsText.add(this.namesBirdIsKnownBy + " Bird Species: " + scientificName);
-        int numberOfNames = ((List<String>) commonNames).size();
-        birdPicButtons = new JButton[numberOfNames];
-        ActionListener soundActionListener = new SoundAction();
+        birdPicButtonLabelsText.add(this.namesBirdIsKnownBy.toString());
+        List<BirdName> names = bird.getNames();
+        birdPicButtons = new JButton[names.size()];
 
         int counter = 0;
 
-        for (String name : commonNames) {
-            String genderSpecificName = birdIdToGenderSpecificNameMap.get(name);
-            StringBuilder aliases = new StringBuilder(name);
-            char sex = genderSpecificName.toLowerCase().charAt(0);
+        for (BirdName name : names) {
+            StringBuilder alias = new StringBuilder(name.getName());
             birdPicButtons[counter] = new JButton("");
             birdPicButtons[counter].setMargin(new Insets(0, 0, 0, 0));
+            ActionListener soundActionListener = new SoundAction(name.getNameId());
             birdPicButtons[counter].addActionListener(soundActionListener);
-            switch (sex) {
+            switch (name.getGender()) {
                 case 'f':
-                    aliases.append(" ,(Female)");
-                    makeButton(counter, aliases, birdPicButtonLabels, birdPicButtonLabelsText);
+                case 'F':
+                    alias.append("(Female)");
+                    makeButton(counter, alias, birdPicButtonLabels, birdPicButtonLabelsText, name.getGender());
                     break;
                 case 'm':
-                    aliases.append(" ,(Male)");
-                    makeButton(counter, aliases, birdPicButtonLabels, birdPicButtonLabelsText);
+                    alias.append("(Male)");
+                    makeButton(counter, alias, birdPicButtonLabels, birdPicButtonLabelsText, name.getGender());
                     break;
                 default:
-                    makeButton(counter, aliases, birdPicButtonLabels, birdPicButtonLabelsText);
+                    makeButton(counter, alias, birdPicButtonLabels, birdPicButtonLabelsText, name.getGender());
             }
             birdPicButtonLabels.get(counter).setText(birdPicButtonLabelsText.get(counter));
             birdGUIMainPanel.add(birdPicButtonLabels.get(counter));
@@ -147,9 +141,9 @@ public class BirdGUI extends JFrame {
         }
     }
 
-    private void makeButton(int counter, StringBuilder aliases, List<JLabel> birdPicButtonLabels, List<String> birdPicButtonLabelsText) {
-        image = ImageRetriever.bigImage(birdId, );
-        birdPicButtonLabelsText.add(aliases.toString());
+    private void makeButton(int counter, StringBuilder alias, List<JLabel> birdPicButtonLabels, List<String> birdPicButtonLabelsText, char sex) throws SQLException, IOException {
+        ImageIcon image = ImageRetriever.bigImage(bird.getBirdId(), sex);
+        birdPicButtonLabelsText.add(alias.toString());
         birdPicButtonLabels.add(new JLabel(birdPicButtonLabelsText.get(counter)));
         birdGUIMainPanel.add(birdPicButtonLabels.get(counter));
         birdPicButtons[counter].setIcon(image);
@@ -157,11 +151,19 @@ public class BirdGUI extends JFrame {
     }
 
     class SoundAction implements ActionListener {
-
+        private final int nameId;
+        SoundAction(int nameId){
+            this.nameId = nameId;
+        }
         @Override
         public void actionPerformed(ActionEvent e) {
-            // TODO Auto-generated method stub
-            MakeSound.playSound("0a0.wav");
+            try {
+                // TODO Auto-generated method stub
+
+                MakeSound.playSound(WavFileRetriever.getSound(bird.getBirdId(), nameId));
+            } catch (SQLException ex) {
+                Logger.getLogger(BirdGUI.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 

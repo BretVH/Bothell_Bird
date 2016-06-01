@@ -30,12 +30,10 @@ class MakeSound {
      * numberOfNamess gonumberOfNamesng to be played
      *
      */
-    public static void playSound(String filename) {
+    public static void playSound(File soundFile) {
 
-        String strFilename = filename;
 
         try {
-            File soundFile = new File(strFilename);
             AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundFile);
             AudioFormat audioFormat = audioStream.getFormat();
             DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);

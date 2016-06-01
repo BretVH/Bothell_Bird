@@ -8,14 +8,9 @@ import java.sql.Statement;
 
 public class WavFileRetriever {
 
-    private final FileMaker maker;
-    private File myFile;
-
-    public WavFileRetriever() {
-        maker = new FileMaker();
-    }
-
-    public File getSound(int ID, int nameId) throws SQLException {
+    public static File getSound(int ID, int nameId) throws SQLException {
+        FileMaker maker = new FileMaker();
+        File myFile = null;
         Connection conn = SimpleDataSource.getconnection();
         Statement stat =  conn.createStatement();
         //get database table
