@@ -56,7 +56,6 @@ public class GUI extends JFrame {
     private JList<?> birdsJList;
     private JScrollPane jScrollPane;
     private JPanel listPanel;
-    private ImageIcon pic;
     private ArrayList<ImageIcon> birdIcons;
     private Iterable<BirdName> birdNames;
     private ArrayList<Bird> updatedBirdData;
@@ -70,7 +69,7 @@ public class GUI extends JFrame {
     private Set<Bird> birds;
     private ListCellRenderer lr;
     private boolean hasAdded = false;
-    private ActionListener listener;
+    private ActionListener flterListener;
     private JButton next = new JButton("Select Feature and Continue Search");
     private final JLabel featuresJlistJLabel;
     private JLabel defaultPicture;
@@ -91,7 +90,7 @@ public class GUI extends JFrame {
         this.birds = new LinkedHashSet<>();
         setVisible(true);
         try {
-            populateBirdNameToBirdIdMap();
+            getBirds();
         } catch (SQLException ex) {
             Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
             JOptionPane.showMessageDialog(null, "Can't connect to database!",
@@ -135,7 +134,7 @@ public class GUI extends JFrame {
         return featureIDs;
     }
 
-    private void populateBirdNameToBirdIdMap() throws SQLException, IOException {
+    private void getBirds() throws SQLException, IOException {
         birdIcons = new ArrayList<>();
 
         birds = BirdsListRetriever.getBirdsList();
@@ -171,8 +170,8 @@ public class GUI extends JFrame {
         imagePanel.add(filterLabel);
         imagePanel.add(featuresJlistJLabel);
         imagePanel.add(jScrollPanes);
-        listener = new NextFilterListener(filters, filterIndex, featureIds, features);
-        next.addActionListener(listener);
+        flterListener = new NextFilterListener(filters, filterIndex, featureIds, features);
+        next.addActionListener(flterListener);
         imagePanel.add(next);
         imagePanel.revalidate();
         revalidate();
@@ -363,9 +362,6 @@ public class GUI extends JFrame {
                     }
                 }
             }
-            if (birdId != 0) {
-
-            }
         }
     }
 
@@ -382,6 +378,7 @@ public class GUI extends JFrame {
     }
 
     class NextFilterListener implements ActionListener {
+
         //next button is only created after createFeaturesJList
         //completes...can refactor later...for now assume
         //that is always the case...
@@ -519,8 +516,13 @@ public class GUI extends JFrame {
         private ArrayList<Bird> filterByHabitat(int featureId) {
             ArrayList<Bird> remainingBirds = new ArrayList<>();
             for (Bird bird : birds) {
-                if (bird.getHabitats().contains(featureId)) {
-                    remainingBirds.add(bird);
+                List<Feature> habitats = bird.getHabitats();
+                //again need to sort/search...
+                for (Feature habitat : habitats) {
+                    if (habitat.getFeatureId() == featureId) {
+                        remainingBirds.add(bird);
+                        break;
+                    }
                 }
             }
             return remainingBirds;
@@ -549,12 +551,14 @@ public class GUI extends JFrame {
         private ArrayList<Bird> filterByLocation(int featureId) {
             ArrayList<Bird> remainingBirds = new ArrayList<>();
             for (Bird bird : birds) {
-                if (bird.getHabitats().contains(featureId)) {
-                    remainingBirds.add(bird);
+                List<Feature> locations = bird.getHabitats();
+                for (Feature location : locations) {
+                    if (location.getFeatureId() == featureId) {
+                        remainingBirds.add(bird);
+                    }
                 }
             }
             return remainingBirds;
         }
     }
-
 }

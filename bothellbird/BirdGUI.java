@@ -161,8 +161,6 @@ public class BirdGUI extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                // TODO Auto-generated method stub
-
                 MakeSound.playSound(WavFileRetriever.getSound(bird.getBirdId(), nameId));
             } catch (SQLException ex) {
                 Logger.getLogger(BirdGUI.class.getName()).log(Level.SEVERE, null, ex);

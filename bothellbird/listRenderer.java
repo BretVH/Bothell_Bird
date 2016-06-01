@@ -1,6 +1,3 @@
-/**
- *
- */
 package bothell_bird;
 
 import java.awt.Component;

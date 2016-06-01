@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package bothell_bird;
 
 import java.sql.Connection;
@@ -17,11 +12,12 @@ import java.util.List;
  * @author Bret
  */
 class LocationRetriever {
-    
-    private static final String query = "SELECT b.locationId, b.uniqueBirdId, " +
-            "location FROM BirdDatabase.dbo.BirdLocations b, " + 
-            "BirdDatabase.dbo.Locations l WHERE uniqueBirdId = ";
+
+    private static final String query = "SELECT b.locationId, b.uniqueBirdId, "
+            + "location FROM BirdDatabase.dbo.BirdLocations b, "
+            + "BirdDatabase.dbo.Locations l WHERE uniqueBirdId = ";
     private static final String join = "AND b.locationId = l.locationId";
+
     static List<Feature> getLocations(int birdId) throws SQLException {
         int count = SqlUtilities.getFeatureCount("BirdLocations");
         Connection conn = SimpleDataSource.getconnection();

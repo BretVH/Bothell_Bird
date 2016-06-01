@@ -22,7 +22,6 @@ public class ColorsRetriever {
 
     public static List<Integer> getSecondaryColors(int birdId) throws SQLException {
         return getColors("secondaryColorId", birdId);
-
     }
 
     private static List<Integer> getColors(String columnName, int id) throws SQLException {
@@ -37,5 +36,4 @@ public class ColorsRetriever {
         }
         return colors;
     }
-
 }
