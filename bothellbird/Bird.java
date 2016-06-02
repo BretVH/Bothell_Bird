@@ -19,14 +19,8 @@ public final class Bird {
     private final List<Feature> habitats;
     private final List<Feature> locations;
     private final ImageIcon icon;
-    private final boolean hasImage;
-    private final boolean hasFemaleImage;
-    private final boolean hasMaleImage;
-    private final boolean hasMaleSound;
-    private final boolean hasFemaleSound;
-    private final boolean hasSound;
 
-    public Bird(int birdId, String name, int cs, int fn, int s, boolean i, boolean fi, boolean mi, boolean ms, boolean fs, boolean w) throws SQLException, IOException {
+    public Bird(int birdId, String name, int cs, int fn, int s) throws SQLException, IOException {
         this.birdId = birdId;
         this.scientificName = name;
         this.conservationStatusId = cs;
@@ -35,37 +29,11 @@ public final class Bird {
         this.names = setNames();
         this.primaryColors = setPrimaryColors();
         this.secondaryColors = setSecondaryColors();
-        this.icon = ImageRetriever.getImageIcon(birdId, getNeutralName().getNameId(), 'n', true, false);
+        this.icon = ImageRetriever.getImageIcon(birdId, 'n', false);
         this.habitats = setHabitats();
         this.locations = setLocations();
-        this.hasImage = i;
-        this.hasFemaleImage = fi;
-        this.hasMaleImage = mi;
-        this.hasFemaleSound = fs;
-        this.hasMaleSound = ms;
-        this.hasSound = w;
     }
-    
-    public boolean hasImage(char gender) {
-        if(gender == 'f') {
-            return hasFemaleImage;
-        }
-        if(gender == 'm') {
-            return hasMaleImage;
-        }
-        return hasImage;
-    }
-    
-    public boolean hasSound(char gender) {
-        if(gender == 'f') {
-            return hasFemaleSound;
-        }
-        if(gender == 'm') {
-            return hasMaleSound;
-        }
-        return hasSound;
-    }
-    
+          
     public int getSizeId() {
         return sizeId;
     }

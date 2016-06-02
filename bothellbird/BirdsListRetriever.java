@@ -29,9 +29,7 @@ public class BirdsListRetriever {
             Bird bird = new Bird(rs.getInt("uniqueBirdId"), 
                 rs.getString("scientificName"), rs.getInt
                 ("conservationStatusId"), rs.getInt("familyNameId"), 
-                rs.getInt("sizeId"), rs.getBoolean("image"), rs.getBoolean("femaleImage"),
-                rs.getBoolean("maleImage"), rs.getBoolean("maleSound"), rs.getBoolean("femaleSound"),
-                rs.getBoolean("sound"));
+                rs.getInt("sizeId"));
             birds.add(bird);
             rs.next();
         }

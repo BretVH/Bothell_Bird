@@ -143,7 +143,7 @@ public class BirdGUI extends JFrame {
     }
 
     private void makeButton(int counter, StringBuilder alias, List<JLabel> birdPicButtonLabels, List<String> birdPicButtonLabelsText, BirdName birdName) throws SQLException, IOException {
-        ImageIcon image = ImageRetriever.getImageIcon(bird.getBirdId(), birdName.getNameId(), birdName.getGender(), bird.hasImage(birdName.getGender()), true);
+        ImageIcon image = ImageRetriever.getImageIcon(bird.getBirdId(), birdName.getGender(), true);
         birdPicButtonLabelsText.add(alias.toString());
         birdPicButtonLabels.add(new JLabel(birdPicButtonLabelsText.get(counter)));
         birdGUIMainPanel.add(birdPicButtonLabels.get(counter));
@@ -162,7 +162,7 @@ public class BirdGUI extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             try { 
-                MakeSound.playSound(WavFileRetriever.getSound(bird.getBirdId(), name.getGender(), bird.hasSound(name.getGender())));
+                MakeSound.playSound(WavFileRetriever.getSound(bird.getBirdId(), name.getGender()));
             } catch (SQLException | IOException | UnsupportedAudioFileException ex) {
                 Logger.getLogger(BirdGUI.class.getName()).log(Level.SEVERE, null, ex);
             }
