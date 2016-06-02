@@ -57,4 +57,20 @@ public class ImageRetriever {
             return new ImageIcon(imageData);
         }
     }
+
+    static int getNumberOfImages(int birdId) throws SQLException {
+         Connection conn = SimpleDataSource.getconnection();
+        Statement stat = conn.createStatement();
+        ResultSet rs = stat.executeQuery(query + birdId);
+        rs.next();
+        int numberOfImages = 0;
+        if(rs.getBoolean("hasImage")){
+            numberOfImages++;
+        }
+        if(rs.getBoolean("hasMaleImage"))
+            numberOfImages++;
+        if(rs.getBoolean("hasFemaleImage"))
+            numberOfImages++;
+        return numberOfImages;
+    }
 }

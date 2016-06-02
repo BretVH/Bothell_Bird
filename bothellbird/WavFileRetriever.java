@@ -33,7 +33,6 @@ public class WavFileRetriever {
         }
         if (hasSound) {
             if (gender == 'm') {
-
                 inputStream = AudioSystem.getAudioInputStream(InputStreamRetriever.make(birdId, 'm', 1, "wav"));
             } else if (gender == 'f') {
                 inputStream = AudioSystem.getAudioInputStream(InputStreamRetriever.make(birdId, 'f', 1, "wav"));
@@ -45,5 +44,23 @@ public class WavFileRetriever {
             inputStream = AudioSystem.getAudioInputStream(InputStreamRetriever.make(0, 'a', 0, "wav"));
         }
         return inputStream;
+    }
+    
+    public static int getNumberOfSounds(int birdId) throws SQLException {
+        Connection conn = SimpleDataSource.getconnection();
+        Statement stat = conn.createStatement();
+        ResultSet rs = stat.executeQuery(query + birdId);
+        rs.next();
+        boolean hasSound = rs.getBoolean("hasSound");
+        boolean hasFemaleSound = rs.getBoolean("hasFemaleSound"); 
+        boolean hasMaleSound = rs.getBoolean("hasMaleSound");
+        int numberOfSounds = 0;
+        if(hasSound)
+            numberOfSounds++;
+        if(hasMaleSound)
+            numberOfSounds++;
+        if(hasFemaleSound)
+            numberOfSounds++;
+        return numberOfSounds;
     }
 }

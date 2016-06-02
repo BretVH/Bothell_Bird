@@ -112,57 +112,86 @@ public class BirdGUI extends JFrame {
         List<String> birdPicButtonLabelsText;
         birdPicButtonLabelsText = new ArrayList<>();
         birdPicButtonLabelsText.add(this.namesBirdIsKnownBy.toString());
-        List<BirdName> names = bird.getNames();
-        birdPicButtons = new JButton[names.size()];
-
-        int counter = 0;
-
-        for (BirdName name : names) {
-            StringBuilder alias = new StringBuilder(name.getName());
-            birdPicButtons[counter] = new JButton("");
-            birdPicButtons[counter].setMargin(new Insets(0, 0, 0, 0));
-            ActionListener soundActionListener = new SoundAction(name);
-            birdPicButtons[counter].addActionListener(soundActionListener);
-            switch (name.getGender()) {
-                case 'f':
-                case 'F':
-                    alias.append("(Female)");
-                    makeButton(counter, alias, birdPicButtonLabels, birdPicButtonLabelsText, name);
-                    break;
-                case 'm':
-                    alias.append("(Male)");
-                    makeButton(counter, alias, birdPicButtonLabels, birdPicButtonLabelsText, name);
-                    break;
-                default:
-                    makeButton(counter, alias, birdPicButtonLabels, birdPicButtonLabelsText, name);
+        List<String> femaleNames = new ArrayList<>();
+        List<String> maleNames = new ArrayList<>();
+        List<String> neuterNames = new ArrayList<>();
+        int nS = WavFileRetriever.getNumberOfSounds(bird.getBirdId()); 
+        int nI = ImageRetriever.getNumberOfImages(bird.getBirdId());
+        int numberOfButtons = nS > nI ? nS : nI;
+        numberOfButtons = numberOfButtons == 0 ? 1 : numberOfButtons;
+        birdPicButtons = new JButton[numberOfButtons];
+        for (BirdName name : bird.getNames()) {
+            if (name.getGender() == 'f') {
+                femaleNames.add(name.getName());
+            } else if (name.getGender() == 'm') {
+                maleNames.add(name.getName());
+            } else {
+                neuterNames.add(name.getName());
             }
-            birdPicButtonLabels.get(counter).setText(birdPicButtonLabelsText.get(counter));
-            birdGUIMainPanel.add(birdPicButtonLabels.get(counter));
-            counter++;
+        }
+
+        if (numberOfButtons < 2) {
+            StringBuilder alias = new StringBuilder();
+            for (String name : neuterNames) {
+                alias.append(name + " ");
+            }
+            birdPicButtons[0] = new JButton("");
+            birdPicButtons[0].setMargin(new Insets(0, 0, 0, 0));
+            ActionListener soundActionListener = new SoundAction('n');
+            birdPicButtons[0].addActionListener(soundActionListener);
+            makeButton(0, alias, birdPicButtonLabels, birdPicButtonLabelsText, 'n');
+            birdPicButtonLabels.get(0).setText(birdPicButtonLabelsText.get(0));
+            birdGUIMainPanel.add(birdPicButtonLabels.get(0));
+        } else {
+            StringBuilder alias = new StringBuilder();
+            alias.append("Female Names: ");
+            for (String name : femaleNames) {
+                alias.append(name + " ");
+            }
+            birdPicButtons[0] = new JButton("");
+            birdPicButtons[0].setMargin(new Insets(0, 0, 0, 0));
+            ActionListener soundActionListenerF = new SoundAction('f');
+            birdPicButtons[0].addActionListener(soundActionListenerF);
+            makeButton(0, alias, birdPicButtonLabels, birdPicButtonLabelsText, 'f');
+            birdPicButtonLabels.get(0).setText(birdPicButtonLabelsText.get(0));
+            birdGUIMainPanel.add(birdPicButtonLabels.get(0));
+            alias = new StringBuilder();
+            alias.append("Male Names: ");
+            for (String name : maleNames) {
+                alias.append(name + " ");
+            }
+            birdPicButtons[1] = new JButton("");
+            birdPicButtons[1].setMargin(new Insets(0, 0, 0, 0));
+            ActionListener soundActionListenerM = new SoundAction('m');
+            birdPicButtons[1].addActionListener(soundActionListenerM);
+            makeButton(1, alias, birdPicButtonLabels, birdPicButtonLabelsText, 'm');
+            birdPicButtonLabels.get(1).setText(birdPicButtonLabelsText.get(1));
+            birdGUIMainPanel.add(birdPicButtonLabels.get(1));
         }
     }
 
-    private void makeButton(int counter, StringBuilder alias, List<JLabel> birdPicButtonLabels, List<String> birdPicButtonLabelsText, BirdName birdName) throws SQLException, IOException {
-        ImageIcon image = ImageRetriever.getImageIcon(bird.getBirdId(), birdName.getGender(), true);
+    private void makeButton(int counter, StringBuilder alias, List<JLabel> birdPicButtonLabels, List<String> birdPicButtonLabelsText, char gender) throws SQLException, IOException {
+        ImageIcon image = ImageRetriever.getImageIcon(bird.getBirdId(), gender, true);
         birdPicButtonLabelsText.add(alias.toString());
         birdPicButtonLabels.add(new JLabel(birdPicButtonLabelsText.get(counter)));
         birdGUIMainPanel.add(birdPicButtonLabels.get(counter));
         birdPicButtons[counter].setIcon(image);
         birdGUIMainPanel.add(birdPicButtons[counter]);
+
     }
 
     class SoundAction implements ActionListener {
 
-        private final BirdName name;
+        private final char gender;
 
-        SoundAction(BirdName name) {
-            this.name = name;
+        SoundAction(char gender) {
+            this.gender = gender;
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
-                MakeSound.playSound(WavFileRetriever.getSound(bird.getBirdId(), name.getGender()));
+                MakeSound.playSound(WavFileRetriever.getSound(bird.getBirdId(), gender));
             } catch (SQLException | IOException | UnsupportedAudioFileException ex) {
                 Logger.getLogger(BirdGUI.class.getName()).log(Level.SEVERE, null, ex);
             }

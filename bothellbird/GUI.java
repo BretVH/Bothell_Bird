@@ -100,6 +100,7 @@ public class GUI extends JFrame {
 
         this.setExtendedState(this.getExtendedState() | this.MAXIMIZED_BOTH);
         setName("BothellBirder \u00a9 Bret Van Hof");
+        setTitle("BothellBirder \u00a9 Bret Van Hof");
         setLayout(new BorderLayout());
         setIconImage(Toolkit.getDefaultToolkit().getImage("defaultBird.jpg")); //sets icon
         setVisible(true);
@@ -303,10 +304,10 @@ public class GUI extends JFrame {
     private void displayBirdGUI(Bird bird) throws SQLException, IOException {
         JFrame display = new BirdGUI(bird);
         display.setVisible(true);
-        setName(bird.getName() + " \u00a9 Bret Van Hof");
+        display.setName(bird.getName() + " \u00a9 Bret Van Hof");
+        display.setTitle(bird.getName() + " \u00a9 Bret Van Hof");
         display.setBounds(30, 30, 800, 600);
         display.toFront();
-
     }
 
     class NameSearchListener implements ActionListener {
