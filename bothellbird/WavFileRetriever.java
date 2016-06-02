@@ -10,33 +10,36 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 public class WavFileRetriever {
- private static final String query = "SELECT [hasMaleSound], [hasFemaleSound], [hasAmbiguousSound] FROM"
-                + " BirdDatabase.dbo.Files where uniqueBirdID = ";
+
+    private static final String query = "SELECT [hasMaleSound], [hasFemaleSound], [hasAmbiguousSound] FROM"
+            + " BirdDatabase.dbo.Files where uniqueBirdID = ";
+
     public static AudioInputStream getSound(int birdId, char gender) throws SQLException, IOException, UnsupportedAudioFileException {
         Connection conn = SimpleDataSource.getconnection();
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery(query + birdId);
-        AudioInputStream inputStream = null;
-        boolean hasSound = false;
-        switch(gender){
+        AudioInputStream inputStream;
+        boolean hasSound;
+        switch (gender) {
             case 'f':
                 hasSound = rs.getBoolean("hasFemaleSound");
                 break;
             case 'm':
                 hasSound = rs.getBoolean("hasMaleSound");
-            default :
+                break;
+            default:
                 hasSound = rs.getBoolean("hasAmbiguousSound");
         }
         if (hasSound) {
-        if (gender == 'm') {
-            
+            if (gender == 'm') {
+
                 inputStream = AudioSystem.getAudioInputStream(InputStreamRetriever.make(birdId, 'm', 1, "wav"));
-            }
-        else if (gender == 'f') {
+            } else if (gender == 'f') {
                 inputStream = AudioSystem.getAudioInputStream(InputStreamRetriever.make(birdId, 'f', 1, "wav"));
-            
-        }else
-            inputStream = AudioSystem.getAudioInputStream(InputStreamRetriever.make(birdId, 'a', 1, "wav"));
+
+            } else {
+                inputStream = AudioSystem.getAudioInputStream(InputStreamRetriever.make(birdId, 'a', 1, "wav"));
+            }
         } else {
             inputStream = AudioSystem.getAudioInputStream(InputStreamRetriever.make(0, 'a', 0, "wav"));
         }

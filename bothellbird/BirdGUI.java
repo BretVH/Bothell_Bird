@@ -161,7 +161,7 @@ public class BirdGUI extends JFrame {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            try { 
+            try {
                 MakeSound.playSound(WavFileRetriever.getSound(bird.getBirdId(), name.getGender()));
             } catch (SQLException | IOException | UnsupportedAudioFileException ex) {
                 Logger.getLogger(BirdGUI.class.getName()).log(Level.SEVERE, null, ex);

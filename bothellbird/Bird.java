@@ -33,7 +33,7 @@ public final class Bird {
         this.habitats = setHabitats();
         this.locations = setLocations();
     }
-          
+
     public int getSizeId() {
         return sizeId;
     }

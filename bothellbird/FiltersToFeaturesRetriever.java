@@ -66,6 +66,7 @@ public class FiltersToFeaturesRetriever {
                     break;
             }
             filterToSelectableFeature.put(tableNames[counter], feature);
+            counter++;
         }
         return filterToSelectableFeature;
     }
@@ -83,7 +84,7 @@ public class FiltersToFeaturesRetriever {
     }
 
     private static List<Feature> getHabitats(String tn, int i, String q) throws SQLException {
-        return getFeatureList(tn, q, "habitat", "habitatId");
+        return getFeatureList(tn, q, "habitatNames", "habitatId");
     }
 
     private static List<Feature> getConservationStatuses(String tn, int i, String q) throws SQLException {
@@ -104,11 +105,13 @@ public class FiltersToFeaturesRetriever {
         Connection conn = SimpleDataSource.getconnection();
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery(q);
+        rs.next();
         for (int i = 0; i < count; i++) {
             int fId = rs.getInt(id);
             String name = rs.getString(n);
             Feature feature = new Feature(fId, name);
             featureList.add(feature);
+            rs.next();
         }
         return featureList;
     }

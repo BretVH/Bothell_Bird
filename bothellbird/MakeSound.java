@@ -25,27 +25,26 @@ class MakeSound {
      */
     public static void playSound(AudioInputStream stream) {
 
-            AudioFormat audioFormat = stream.getFormat();
-            DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
-            try (SourceDataLine sourceLine = (SourceDataLine) AudioSystem.getLine(info)) {
-                sourceLine.open(audioFormat);
-                sourceLine.start();
+        AudioFormat audioFormat = stream.getFormat();
+        DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
+        try (SourceDataLine sourceLine = (SourceDataLine) AudioSystem.getLine(info)) {
+            sourceLine.open(audioFormat);
+            sourceLine.start();
 
-                int nBytesRead = 0;
-                byte[] abData = new byte[BUFFER_SIZE];
-                while (nBytesRead != -1) {
-                    try {
-                        nBytesRead = stream.read(abData, 0, abData.length);
-                    } catch (IOException e) {
-                    }
-                    if (nBytesRead >= 0) {
-                        sourceLine.write(abData, 0, nBytesRead);
-                    }
+            int nBytesRead = 0;
+            byte[] abData = new byte[BUFFER_SIZE];
+            while (nBytesRead != -1) {
+                try {
+                    nBytesRead = stream.read(abData, 0, abData.length);
+                } catch (IOException e) {
                 }
-
-                sourceLine.drain();
+                if (nBytesRead >= 0) {
+                    sourceLine.write(abData, 0, nBytesRead);
+                }
             }
-         catch (LineUnavailableException ex) {
+
+            sourceLine.drain();
+        } catch (LineUnavailableException ex) {
             Logger.getLogger(MakeSound.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

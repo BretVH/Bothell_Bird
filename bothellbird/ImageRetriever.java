@@ -9,21 +9,25 @@ import java.sql.Statement;
 import javax.swing.ImageIcon;
 
 public class ImageRetriever {
-    private static final String query = "SELECT [hasMaleImage], [hasFemaleImage], [hasAmbiguousImage] FROM"
-                + " BirdDatabase.dbo.Files where uniqueBirdID = ";
+
+    private static final String query = "SELECT [hasMaleImage], [hasFemaleImage], [hasImage] FROM"
+            + " BirdDatabase.dbo.Files where uniqueBirdID = ";
+
     public static ImageIcon getImageIcon(int uniqueBirdId, char gender, boolean isLarge) throws SQLException, IOException {
-         Connection conn = SimpleDataSource.getconnection();
+        Connection conn = SimpleDataSource.getconnection();
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery(query + uniqueBirdId);
-        boolean hasImage = false;
-        switch(gender){
+        rs.next();
+        boolean hasImage;
+        switch (gender) {
             case 'f':
                 hasImage = rs.getBoolean("hasFemaleImage");
                 break;
             case 'm':
                 hasImage = rs.getBoolean("hasMaleImage");
-            default :
-                hasImage = rs.getBoolean("hasAmbiguousImage");
+                break;
+            default:
+                hasImage = rs.getBoolean("hasImage");
         }
         if (hasImage) {
             if (isLarge) {

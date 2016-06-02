@@ -155,11 +155,14 @@ public class GUI extends JFrame {
         int[] featureIds = getFeatureIds(features);
         jListModel.clear();
         int i = 0;
+        String[] featureNames = new String[features.size()];
         for (Feature feature : features) {
-            jListModel.add(i, feature.getFeatureName());
+            String featureName = feature.getFeatureName();
+            jListModel.add(i, featureName);
+            featureNames[i] = featureName;
             i++;
         }
-        selectableFeaturesJList = new JList<>((String[]) features.toArray());
+        selectableFeaturesJList = new JList<>(featureNames);
         selectableFeaturesJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         selectableFeaturesJList.setModel(jListModel);
         selectableFeaturesJList.setSelectedIndex(0);

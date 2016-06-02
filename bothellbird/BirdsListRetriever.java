@@ -9,7 +9,8 @@ public class BirdsListRetriever {
 
     private static Set<Bird> birds;
     //get database table
-    private static final String getBirdInfoQuery = "SELECT * FROM BirdDatabase.dbo.uniqueBirds";  
+    private static final String getBirdInfoQuery = "SELECT * FROM BirdDatabase.dbo.uniqueBirds";
+
     /**
      * queries server to populate a list of Birds
      *
@@ -26,14 +27,13 @@ public class BirdsListRetriever {
         rs.next();
         for (int j = 0; j < i; j++)//populate arraylist
         {
-            Bird bird = new Bird(rs.getInt("uniqueBirdId"), 
-                rs.getString("scientificName"), rs.getInt
-                ("conservationStatusId"), rs.getInt("familyNameId"), 
-                rs.getInt("sizeId"));
+            Bird bird = new Bird(rs.getInt("uniqueBirdId"),
+                    rs.getString("scientificName"), rs.getInt("conservationStatusId"), rs.getInt("familyNameId"),
+                    rs.getInt("sizeId"));
             birds.add(bird);
             rs.next();
         }
         conn.close();
         return birds;
-    }   
+    }
 }

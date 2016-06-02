@@ -12,13 +12,13 @@ import java.sql.Statement;
 public class SqlUtilities {
 
     public static int getFeatureCount(String tn) throws SQLException {
-        String countQuery = "SELECT COUNT(*) FROM BirdDatabase.dbo." + tn;
+        String countQuery = "SELECT COUNT (*) AS myCount FROM BirdDatabase.dbo." + tn;
         Connection conn = SimpleDataSource.getconnection();
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery(countQuery);
         int numberOfFeatures = 0;
         while (rs.next()) {
-            numberOfFeatures = Integer.parseInt(rs.getString("count(*)"));
+            numberOfFeatures = rs.getInt("myCount");
         }
         return numberOfFeatures;
     }

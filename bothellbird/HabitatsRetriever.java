@@ -14,7 +14,7 @@ import java.util.List;
 class HabitatsRetriever {
 
     private static final String query = "SELECT b.habitatId, b.uniqueBirdId, "
-            + "habitatName FROM BirdDatabase.dbo.BirdHabitats b, "
+            + "habitatNames FROM BirdDatabase.dbo.BirdHabitats b, "
             + "BirdDatabase.dbo.Habitats h WHERE uniqueBirdId = ";
     private static final String join = "AND b.habitatId = h.habitatId";
 
@@ -24,9 +24,10 @@ class HabitatsRetriever {
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery(query + birdId + join);
         ArrayList<Feature> habitatsList = new ArrayList<>();
+        rs.next();
         for (int i = 0; i < count; i++) {
             int habitatId = rs.getInt("habitatId");
-            String habitatName = rs.getString("habitatName");
+            String habitatName = rs.getString("habitatNames");
             habitatsList.add(new Feature(habitatId, habitatName));
         }
         return habitatsList;

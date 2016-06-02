@@ -15,8 +15,10 @@ import java.sql.SQLException;
  */
 public class SimpleDataSource {
 
+    //Temp home untill database is hosted on aws or Azure...
+    //will also Export db to a file for offline consumption...
     private static final String url
-            = "jdbc:sqlserver://192.168.1.1 ";
+            = "jdbc:sqlserver://;serverName=2601:601:8900:1f3b:e10a:ecb4:9746:d1bd\\DOMECILE0";
     final private static String username = "BBUSer";
     final private static String password = "Bothellbird";
 

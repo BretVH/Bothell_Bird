@@ -20,6 +20,7 @@ public class BirdNamesRetriever {
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery(query + birdId);
         ArrayList<BirdName> namesList = new ArrayList<>();
+        rs.next();
         for (int i = 0; i < count; i++) {
             char gender = rs.getString("gender").charAt(0);
             String name = rs.getString("uniqueName");

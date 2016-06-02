@@ -24,10 +24,11 @@ class LocationRetriever {
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery(query + birdId + join);
         ArrayList<Feature> locations = new ArrayList<>();
+        rs.next();
         for (int i = 0; i < count; i++) {
-            int habitatId = rs.getInt("habitatId");
-            String habitatName = rs.getString("habitatName");
-            locations.add(new Feature(habitatId, habitatName));
+            int locationId = rs.getInt("locationId");
+            String location = rs.getString("location");
+            locations.add(new Feature(locationId, location));
         }
         return locations;
     }

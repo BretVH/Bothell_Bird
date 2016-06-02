@@ -17,11 +17,11 @@ public class InputStreamRetriever {
             Statement stat = conn.createStatement();
             final String prefix = ID + "" + gender + "" + num;
             String query = "SELECT * FROM"
-                    + " BirdsDatabase.dbo.MyBirdStore Where name = '"
+                    + " MyBirdStore.dbo.Store Where name = '"
                     + prefix + "." + type + "'";
             ResultSet rs = stat.executeQuery(query);
             rs.next();
-            blob = rs.getBlob("file_stream");
+            blob = rs.getBlob("Chart");
         }
         return (InputStream) blob.getBinaryStream();
     }
