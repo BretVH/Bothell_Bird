@@ -315,25 +315,25 @@ public class GUI extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             String birdName = searchBox.getText();
-            if (birdNameToBirdIdMap.get(birdName) != null) {
-                Bird selectedBird;
-                for (BirdName name : birdNames) {
-                    if (name.getBirdId() == birdNameToBirdIdMap.get(birdName)) {
-                        for (Bird bird : birds) {
-                            if (bird.getBirdId() == name.getBirdId()) {
-                                selectedBird = bird;
-                                try {
-                                    displayBirdGUI(selectedBird);
-                                } catch (SQLException | IOException ex) {
-                                    Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
-                                }
-                                break;
+            Bird selectedBird = null;
+            for (BirdName name : birdNames) {
+                if (name.getName().toLowerCase().contains(birdName.toLowerCase())) {
+                    for (Bird bird : birds) {
+                        if (bird.getBirdId() == name.getBirdId()) {
+                            selectedBird = bird;
+                            try {
+                                displayBirdGUI(selectedBird);
+                            } catch (SQLException | IOException ex) {
+                                Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
                             }
+                            break;
                         }
-                        break;
                     }
+                    break;
                 }
-            } else {
+
+            }
+            if (selectedBird == null) {
                 JOptionPane.showMessageDialog(null, "Bird Not Found!",
                         "", JOptionPane.WARNING_MESSAGE);
             }
