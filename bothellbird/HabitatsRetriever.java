@@ -29,6 +29,7 @@ class HabitatsRetriever {
             int habitatId = rs.getInt("habitatId");
             String habitatName = rs.getString("habitatNames");
             habitatsList.add(new Feature(habitatId, habitatName));
+            rs.next();
         }
         return habitatsList;
     }

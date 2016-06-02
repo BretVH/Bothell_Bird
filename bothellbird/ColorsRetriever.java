@@ -14,8 +14,9 @@ import java.util.List;
 public class ColorsRetriever {
 
     private static final String getBirdColorsQuery = "SELECT * FROM"
-            + " BirdDatabase.dbo.uniqueBirdColors WHERE uniqueBirdId = ";
+            + " BirdDatabase.dbo.uniqueBirdColors u, BirdDatabase.dbo.BirdColor b WHERE uniqueBirdId = ";
 
+    private static final String join = " AND u.birdColorId = b.birdColorId";
     public static List<Integer> getPrimaryColors(int birdId) throws SQLException {
         return getColors("primaryColorId", birdId);
     }
@@ -29,10 +30,11 @@ public class ColorsRetriever {
         List<Integer> colors = new ArrayList<>();
         Connection conn = SimpleDataSource.getconnection();
         Statement stat = conn.createStatement();
-        ResultSet rs = stat.executeQuery(getBirdColorsQuery + id);
+        ResultSet rs = stat.executeQuery(getBirdColorsQuery + id + join);
         rs.next();
-        for (int j = 0; i < i; j++) {
+        for (int j = 0; j < i; j++) {
             colors.add(rs.getInt(columnName));
+            rs.next();
         }
         return colors;
     }

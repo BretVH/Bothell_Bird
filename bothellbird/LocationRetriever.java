@@ -16,7 +16,7 @@ class LocationRetriever {
     private static final String query = "SELECT b.locationId, b.uniqueBirdId, "
             + "location FROM BirdDatabase.dbo.BirdLocations b, "
             + "BirdDatabase.dbo.Locations l WHERE uniqueBirdId = ";
-    private static final String join = "AND b.locationId = l.locationId";
+    private static final String join = " AND b.locationId = l.locationId";
 
     static List<Feature> getLocations(int birdId) throws SQLException {
         int count = SqlUtilities.getFeatureCount("BirdLocations");
@@ -29,6 +29,7 @@ class LocationRetriever {
             int locationId = rs.getInt("locationId");
             String location = rs.getString("location");
             locations.add(new Feature(locationId, location));
+            rs.next();
         }
         return locations;
     }

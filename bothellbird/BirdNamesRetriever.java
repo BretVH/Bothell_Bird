@@ -27,6 +27,7 @@ public class BirdNamesRetriever {
             int nameId = rs.getInt("nameId");
             BirdName birdName = new BirdName(gender, name, nameId, birdId);
             namesList.add(birdName);
+            rs.next();
         }
         return namesList;
     }
