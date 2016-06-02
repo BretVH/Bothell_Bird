@@ -11,7 +11,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 public class WavFileRetriever {
 
-    private static final String query = "SELECT [hasMaleSound], [hasFemaleSound], [hasAmbiguousSound] FROM"
+    private static final String query = "SELECT [hasMaleSound], [hasFemaleSound], [hasSound] FROM"
             + " BirdDatabase.dbo.Files where uniqueBirdID = ";
 
     public static AudioInputStream getSound(int birdId, char gender) throws SQLException, IOException, UnsupportedAudioFileException {
@@ -20,6 +20,7 @@ public class WavFileRetriever {
         ResultSet rs = stat.executeQuery(query + birdId);
         AudioInputStream inputStream;
         boolean hasSound;
+        rs.next();
         switch (gender) {
             case 'f':
                 hasSound = rs.getBoolean("hasFemaleSound");
@@ -28,7 +29,7 @@ public class WavFileRetriever {
                 hasSound = rs.getBoolean("hasMaleSound");
                 break;
             default:
-                hasSound = rs.getBoolean("hasAmbiguousSound");
+                hasSound = rs.getBoolean("hasSound");
         }
         if (hasSound) {
             if (gender == 'm') {

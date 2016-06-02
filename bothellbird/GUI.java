@@ -350,15 +350,10 @@ public class GUI extends JFrame {
         public void actionPerformed(ActionEvent e) {
             int birdId = 0;
             //inefficient should sort/search
-            for (BirdName birdName : birdNames) {
-                if (birdName.getNameId() == (Integer) birdsJList.getSelectedValue()) {
-                    birdId = birdName.getBirdId();
-                }
-            }
-            //inefficient sort/search
             for (Bird bird : birds) {
-                if (bird.getBirdId() == birdId) {
-                    try {
+                if (bird.getBirdId() == (Integer) birdsJList.getSelectedValue()) {
+                    birdId = bird.getBirdId();
+                     try {
                         displayBirdGUI(bird);
                     } catch (SQLException | IOException ex) {
                         Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
