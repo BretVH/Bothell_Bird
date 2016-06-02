@@ -9,14 +9,13 @@ public class BirdsListRetriever {
 
     private static Set<Bird> birds;
     //get database table
-    private static final String getBirdInfoQuery = "SELECT [uniqueBirdId], "
-            + "[ScientificName], [sizeIdId], [familyNameId], "
-            + "[conservationStatusId] FROM" + " BirdDatabase.dbo.uniqueBirds";  
+    private static final String getBirdInfoQuery = "SELECT * FROM BirdDatabase.dbo.uniqueBirds";  
     /**
      * queries server to populate a list of Birds
      *
      * @return list of birds
      * @throws SQLException
+     * @throws java.io.IOException
      */
     public static Set<Bird> getBirdsList() throws SQLException, IOException {
         int i = SqlUtilities.getFeatureCount("uniqueBirds");
@@ -27,11 +26,13 @@ public class BirdsListRetriever {
         rs.next();
         for (int j = 0; j < i; j++)//populate arraylist
         {
-            Bird aBirdName = new Bird(rs.getInt("uniqueBirdId"), 
+            Bird bird = new Bird(rs.getInt("uniqueBirdId"), 
                 rs.getString("scientificName"), rs.getInt
                 ("conservationStatusId"), rs.getInt("familyNameId"), 
-                rs.getInt("sizeId"));
-            birds.add(aBirdName);
+                rs.getInt("sizeId"), rs.getBoolean("image"), rs.getBoolean("femaleImage"),
+                rs.getBoolean("maleImage"), rs.getBoolean("maleSound"), rs.getBoolean("femaleSound"),
+                rs.getBoolean("sound"));
+            birds.add(bird);
             rs.next();
         }
         conn.close();

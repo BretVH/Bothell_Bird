@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -120,20 +121,20 @@ public class BirdGUI extends JFrame {
             StringBuilder alias = new StringBuilder(name.getName());
             birdPicButtons[counter] = new JButton("");
             birdPicButtons[counter].setMargin(new Insets(0, 0, 0, 0));
-            ActionListener soundActionListener = new SoundAction(name.getNameId());
+            ActionListener soundActionListener = new SoundAction(name);
             birdPicButtons[counter].addActionListener(soundActionListener);
             switch (name.getGender()) {
                 case 'f':
                 case 'F':
                     alias.append("(Female)");
-                    makeButton(counter, alias, birdPicButtonLabels, birdPicButtonLabelsText, name.getGender());
+                    makeButton(counter, alias, birdPicButtonLabels, birdPicButtonLabelsText, name);
                     break;
                 case 'm':
                     alias.append("(Male)");
-                    makeButton(counter, alias, birdPicButtonLabels, birdPicButtonLabelsText, name.getGender());
+                    makeButton(counter, alias, birdPicButtonLabels, birdPicButtonLabelsText, name);
                     break;
                 default:
-                    makeButton(counter, alias, birdPicButtonLabels, birdPicButtonLabelsText, name.getGender());
+                    makeButton(counter, alias, birdPicButtonLabels, birdPicButtonLabelsText, name);
             }
             birdPicButtonLabels.get(counter).setText(birdPicButtonLabelsText.get(counter));
             birdGUIMainPanel.add(birdPicButtonLabels.get(counter));
@@ -141,8 +142,8 @@ public class BirdGUI extends JFrame {
         }
     }
 
-    private void makeButton(int counter, StringBuilder alias, List<JLabel> birdPicButtonLabels, List<String> birdPicButtonLabelsText, char sex) throws SQLException, IOException {
-        ImageIcon image = ImageRetriever.bigImage(bird.getBirdId(), sex);
+    private void makeButton(int counter, StringBuilder alias, List<JLabel> birdPicButtonLabels, List<String> birdPicButtonLabelsText, BirdName birdName) throws SQLException, IOException {
+        ImageIcon image = ImageRetriever.getImageIcon(bird.getBirdId(), birdName.getNameId(), birdName.getGender(), bird.hasImage(birdName.getGender()), true);
         birdPicButtonLabelsText.add(alias.toString());
         birdPicButtonLabels.add(new JLabel(birdPicButtonLabelsText.get(counter)));
         birdGUIMainPanel.add(birdPicButtonLabels.get(counter));
@@ -152,17 +153,17 @@ public class BirdGUI extends JFrame {
 
     class SoundAction implements ActionListener {
 
-        private final int nameId;
+        private final BirdName name;
 
-        SoundAction(int nameId) {
-            this.nameId = nameId;
+        SoundAction(BirdName name) {
+            this.name = name;
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            try {
-                MakeSound.playSound(WavFileRetriever.getSound(bird.getBirdId(), nameId));
-            } catch (SQLException ex) {
+            try { 
+                MakeSound.playSound(WavFileRetriever.getSound(bird.getBirdId(), name.getGender(), bird.hasSound(name.getGender())));
+            } catch (SQLException | IOException | UnsupportedAudioFileException ex) {
                 Logger.getLogger(BirdGUI.class.getName()).log(Level.SEVERE, null, ex);
             }
         }

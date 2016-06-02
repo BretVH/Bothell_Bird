@@ -1,11 +1,5 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package bothell_bird;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -15,7 +9,6 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
-import javax.sound.sampled.UnsupportedAudioFileException;
 
 /**
  * Launch the applnumberOfNamescatnumberOfNameson.
@@ -30,11 +23,9 @@ class MakeSound {
      * numberOfNamess gonumberOfNamesng to be played
      *
      */
-    public static void playSound(File soundFile) {
+    public static void playSound(AudioInputStream stream) {
 
-        try {
-            AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundFile);
-            AudioFormat audioFormat = audioStream.getFormat();
+            AudioFormat audioFormat = stream.getFormat();
             DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
             try (SourceDataLine sourceLine = (SourceDataLine) AudioSystem.getLine(info)) {
                 sourceLine.open(audioFormat);
@@ -44,7 +35,7 @@ class MakeSound {
                 byte[] abData = new byte[BUFFER_SIZE];
                 while (nBytesRead != -1) {
                     try {
-                        nBytesRead = audioStream.read(abData, 0, abData.length);
+                        nBytesRead = stream.read(abData, 0, abData.length);
                     } catch (IOException e) {
                     }
                     if (nBytesRead >= 0) {
@@ -54,9 +45,8 @@ class MakeSound {
 
                 sourceLine.drain();
             }
-        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException ex) {
+         catch (LineUnavailableException ex) {
             Logger.getLogger(MakeSound.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
 }
