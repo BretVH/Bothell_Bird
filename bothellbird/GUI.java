@@ -176,7 +176,7 @@ public class GUI extends JFrame {
         ActionListener flterListener = new NextFilterListener(filters, filterIndex);
         next.addActionListener(flterListener);
         ActionListener skipListener = new SkipFilterListener(filters, filterIndex);
-        sip.addActionListener(skipListener);
+        skip.addActionListener(skipListener);
         imagePanel.add(next);
         imagePanel.add(skip);
         imagePanel.revalidate();
@@ -294,7 +294,7 @@ public class GUI extends JFrame {
         buttonPanel.add(displayBird);
     }
 
-    private void displayBirdGUI(Bird bird) throws SQLException, IOException {
+    private void displayBirdGUI(DisplayBird bird) throws SQLException, IOException {
         JFrame display = new BirdGUI(bird);
         display.setVisible(true);
         display.setName(bird.getName() + " \u00a9 Bret Van Hof");
@@ -315,7 +315,7 @@ public class GUI extends JFrame {
                         if (bird.getBirdId() == name.getBirdId()) {
                             selectedBird = bird;
                             try {
-                                displayBirdGUI(selectedBird);
+                                displayBirdGUI(new DisplayBird(selectedBird));
                             } catch (SQLException | IOException ex) {
                                 Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
                             }
@@ -359,9 +359,9 @@ public class GUI extends JFrame {
         public void actionPerformed(ActionEvent e) {
             //inefficient should sort/search
             for (Bird bird : birds) {
-                if (bird.getBirdId() == birdsJList.getSelectedValue()) {                   
+                if (bird.getBirdId() == birdsJList.getSelectedValue()) {
                     try {
-                        displayBirdGUI(bird);
+                        displayBirdGUI(new DisplayBird(bird));
                     } catch (SQLException | IOException ex) {
                         Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -383,10 +383,10 @@ public class GUI extends JFrame {
             }
         }
     }
-    
+
     class SkipFilterListener implements ActionListener {
-        
-         //next button is only created after createFeaturesJList
+
+        //skip button is only created after createFeaturesJList
         //completes...can refactor later...for now assume
         //that is always the case...
         private final String[] filters;
@@ -396,7 +396,7 @@ public class GUI extends JFrame {
             this.filters = filters;
             this.filterIndex = filterIndex;
         }
-        
+
         public void actionPerformed(ActionEvent e) {
             if (filterIndex >= filters.length - 1) {
                 imagePanel.removeAll();
@@ -412,7 +412,7 @@ public class GUI extends JFrame {
             }
         }
     }
-    
+
     class NextFilterListener implements ActionListener {
 
         //next button is only created after createFeaturesJList
@@ -436,7 +436,7 @@ public class GUI extends JFrame {
             } else {
                 int selectedFeatureIndex = selectableFeaturesJList.getSelectedIndex() + 1;
                 updatedBirdData = filterBirds(selectedFeatureIndex, filters[filterIndex]);
-                removeFilteredBirds();
+                birds.retainAll(updatedBirdData);
                 birdsJList.removeAll();
                 try {
                     updateJList(birds);
@@ -449,10 +449,6 @@ public class GUI extends JFrame {
                     Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-        }
-
-        private void removeFilteredBirds() {
-            birds.retainAll(updatedBirdData);
         }
 
         private ArrayList<Bird> filterBirds(int featureId, String filter) {
@@ -555,11 +551,23 @@ public class GUI extends JFrame {
         }
 
         private ArrayList<Bird> filterByBillShape(int featureId) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            ArrayList<Bird> remainingBirds = new ArrayList<>();
+            for (Bird bird : birds) {
+                if (bird.getBillShapeId() == featureId) {
+                    remainingBirds.add(bird);
+                }
+            }
+            return remainingBirds;
         }
 
         private ArrayList<Bird> filterByWingShape(int featureId) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            ArrayList<Bird> remainingBirds = new ArrayList<>();
+            for (Bird bird : birds) {
+                if (bird.getWingShapeId() == featureId) {
+                    remainingBirds.add(bird);
+                }
+            }
+            return remainingBirds;
         }
     }
 }
