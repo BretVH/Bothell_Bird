@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -66,23 +67,19 @@ public class GUI extends JFrame {
     private JPanel buttonPanel;
     private JButton displayBird;
     private Map<Integer, String> birdIdToBirdName;
-    private Set<Bird> fullListOfBirds;
+    private final Set<Bird> fullListOfBirds;
     private Set<Bird> birds;
     private ListCellRenderer lr;
-    private ActionListener flterListener;
-    private JButton next = new JButton("Select Feature and Continue Search");
     private final JLabel featuresJlistJLabel;
     private JLabel defaultPicture;
     private JList<String> selectableFeaturesJList = new JList<>();
     private final DefaultListModel<String> jListModel;
     private Map<String, List<Feature>> filterToFeatures;
-    private final HashMap<String, Integer> birdNameToBirdIdMap;
 
     /**
      * @throws HeadlessException
      */
     public GUI() throws HeadlessException {
-        this.birdNameToBirdIdMap = new HashMap<>();
         this.filterToFeatures = new HashMap<>();
         this.jListModel = new DefaultListModel<>();
         this.featuresJlistJLabel = new JLabel();
@@ -95,6 +92,7 @@ public class GUI extends JFrame {
                     "", JOptionPane.WARNING_MESSAGE);
             JOptionPane.showMessageDialog(null, "Using offline data");
         }
+        fullListOfBirds = birds.stream().collect(Collectors.toCollection(LinkedHashSet::new));
         populateBirdIconsAndNames();
         GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
 
@@ -138,10 +136,8 @@ public class GUI extends JFrame {
 
     private void populateBirdIconsAndNames() {
         birdIcons = new ArrayList<>();
-        fullListOfBirds = new LinkedHashSet<>();
         for (Bird bird : birds) {
             birdNames = bird.getNames();
-            fullListOfBirds.add(bird);
         }
     }
 
@@ -151,17 +147,11 @@ public class GUI extends JFrame {
         }
     }
 
-    public ActionListener makeNewNextFilterActionListener(String[] filters, int filterIndex, int[] featureIds, List<Feature> features) {
-        ActionListener nextAction = new NextFilterListener(filters, filterIndex, featureIds, features);
-        return nextAction;
-    }
-
     private void createFeaturesJList(int filterIndex) throws SQLException {
         filterToFeatures = FiltersToFeaturesRetriever.getFilterToFeaturesMap();
         String[] filters = getFilters();
         List<Feature> features = filterToFeatures.get(filters[filterIndex]);
         features.sort(new FeatureComparator());
-        int[] featureIds = getFeatureIds(features);
         jListModel.clear();
         int i = 0;
         String[] featureNames = new String[features.size()];
@@ -176,16 +166,19 @@ public class GUI extends JFrame {
         selectableFeaturesJList.setModel(jListModel);
         selectableFeaturesJList.setSelectedIndex(0);
         JScrollPane jScrollPanes = new javax.swing.JScrollPane(selectableFeaturesJList);
-        next = new JButton("Next set of criteria");
+        JButton skip = new JButton("Skip current set of criteria");
+        JButton next = new JButton("Next set of criteria");
         imagePanel.removeAll();
         JLabel filterLabel = new JLabel(filters[filterIndex]);
         imagePanel.add(filterLabel);
         imagePanel.add(featuresJlistJLabel);
         imagePanel.add(jScrollPanes);
-        next.removeActionListener(flterListener);
-        flterListener = makeNewNextFilterActionListener(filters, filterIndex, featureIds, features);
+        ActionListener flterListener = new NextFilterListener(filters, filterIndex);
         next.addActionListener(flterListener);
+        ActionListener skipListener = new SkipFilterListener(filters, filterIndex);
+        sip.addActionListener(skipListener);
         imagePanel.add(next);
+        imagePanel.add(skip);
         imagePanel.revalidate();
         revalidate();
     }
@@ -364,11 +357,9 @@ public class GUI extends JFrame {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            int birdId = 0;
             //inefficient should sort/search
             for (Bird bird : birds) {
-                if (bird.getBirdId() == (Integer) birdsJList.getSelectedValue()) {
-                    birdId = bird.getBirdId();
+                if (bird.getBirdId() == birdsJList.getSelectedValue()) {                   
                     try {
                         displayBirdGUI(bird);
                     } catch (SQLException | IOException ex) {
@@ -392,7 +383,36 @@ public class GUI extends JFrame {
             }
         }
     }
+    
+    class SkipFilterListener implements ActionListener {
+        
+         //next button is only created after createFeaturesJList
+        //completes...can refactor later...for now assume
+        //that is always the case...
+        private final String[] filters;
+        private int filterIndex;
 
+        SkipFilterListener(String[] filters, int filterIndex) {
+            this.filters = filters;
+            this.filterIndex = filterIndex;
+        }
+        
+        public void actionPerformed(ActionEvent e) {
+            if (filterIndex >= filters.length - 1) {
+                imagePanel.removeAll();
+                imagePanel.add(defaultPicture);
+                imagePanel.revalidate();
+                filterIndex = 0;
+            } else {
+                try {
+                    createFeaturesJList(filterIndex + 1);
+                } catch (SQLException ex) {
+                    Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+    }
+    
     class NextFilterListener implements ActionListener {
 
         //next button is only created after createFeaturesJList
@@ -400,14 +420,10 @@ public class GUI extends JFrame {
         //that is always the case...
         private final String[] filters;
         private int filterIndex;
-        private final int[] featureIds;
-        private final List<Feature> features;
 
-        NextFilterListener(String[] filters, int filterIndex, int[] featureIds, List<Feature> features) {
+        NextFilterListener(String[] filters, int filterIndex) {
             this.filters = filters;
             this.filterIndex = filterIndex;
-            this.featureIds = featureIds;
-            this.features = features;
         }
 
         @Override
@@ -436,29 +452,7 @@ public class GUI extends JFrame {
         }
 
         private void removeFilteredBirds() {
-            //make array big enough to hold all birds incase they
-            //are all filtered out.
-            Bird[] fileteredBirds = new Bird[birds.size()];
-            int numberOfFilteredBirds = 0;
-            for (Bird bird : birds) {
-                boolean stillExists = false;
-                //could sort then use binary search...if this gets
-                //large...
-                for (int i = 0; i < updatedBirdData.size(); i++) {
-                    if (updatedBirdData.get(i).getBirdId() == bird.getBirdId()) {
-                        stillExists = true;
-                    }
-                }
-                //add non-existent bird to list of Filtered birds...
-                if (!stillExists) {
-                    fileteredBirds[numberOfFilteredBirds] = bird;
-                    numberOfFilteredBirds++;
-                }
-            }
-            //remove filtered birds...
-            for (int j = 0; j < numberOfFilteredBirds; j++) {
-                birds.remove(fileteredBirds[j]);
-            }
+            birds.retainAll(updatedBirdData);
         }
 
         private ArrayList<Bird> filterBirds(int featureId, String filter) {
@@ -477,6 +471,10 @@ public class GUI extends JFrame {
                     return filterBySize(featureId);
                 case "Locations":
                     return filterByLocation(featureId);
+                case "Bill Shape":
+                    return filterByBillShape(featureId);
+                case "Wing Shape":
+                    return filterByWingShape(featureId);
                 default:
                     return null;
             }
@@ -495,8 +493,8 @@ public class GUI extends JFrame {
         private ArrayList<Bird> filterBySecondaryColor(int featureId) {
             ArrayList<Bird> remainingBirds = new ArrayList<>();
             for (Bird bird : birds) {
-                List<Integer> birdColors = bird.getSecondaryColors();
-                if (birdColors.contains((Integer) featureId)) {
+                List<Integer> birdColors = bird.getSecondaryColorIds();
+                if (birdColors.contains(featureId)) {
                     remainingBirds.add(bird);
                 }
             }
@@ -506,7 +504,7 @@ public class GUI extends JFrame {
         private ArrayList<Bird> filterByPrimaryColor(int featureId) {
             ArrayList<Bird> remainingBirds = new ArrayList<>();
             for (Bird bird : birds) {
-                if (bird.getPrimaryColors().contains(featureId)) {
+                if (bird.getPrimaryColorIds().contains(featureId)) {
                     remainingBirds.add(bird);
                 }
             }
@@ -516,13 +514,10 @@ public class GUI extends JFrame {
         private ArrayList<Bird> filterByHabitat(int featureId) {
             ArrayList<Bird> remainingBirds = new ArrayList<>();
             for (Bird bird : birds) {
-                List<Feature> habitats = bird.getHabitats();
-                //again need to sort/search...
-                for (Feature habitat : habitats) {
-                    if (habitat.getFeatureId() == featureId) {
-                        remainingBirds.add(bird);
-                        break;
-                    }
+                List<Integer> habitats = bird.getHabitatIds();
+                if (habitats.contains(featureId)) {
+                    remainingBirds.add(bird);
+                    break;
                 }
             }
             return remainingBirds;
@@ -551,14 +546,20 @@ public class GUI extends JFrame {
         private ArrayList<Bird> filterByLocation(int featureId) {
             ArrayList<Bird> remainingBirds = new ArrayList<>();
             for (Bird bird : birds) {
-                List<Feature> locations = bird.getLocations();
-                for (Feature location : locations) {
-                    if (location.getFeatureId() == featureId) {
-                        remainingBirds.add(bird);
-                    }
+                List<Integer> locations = bird.getLocationIds();
+                if (locations.contains(featureId)) {
+                    remainingBirds.add(bird);
                 }
             }
             return remainingBirds;
+        }
+
+        private ArrayList<Bird> filterByBillShape(int featureId) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        private ArrayList<Bird> filterByWingShape(int featureId) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     }
 }

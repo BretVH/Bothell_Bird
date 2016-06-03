@@ -14,7 +14,7 @@ import java.util.Map;
  * @author Bret
  */
 public class FiltersToFeaturesRetriever {
-
+    //TODO: Add query strings for bill/wing shape
     private static final String[] queriesForSelectableFeatures = {
         "SELECT * FROM BirdDatabase.dbo.Locations",
         "SELECT * FROM BirdDatabase.dbo.Habitats",
@@ -23,7 +23,7 @@ public class FiltersToFeaturesRetriever {
         "SELECT * FROM BirdDatabase.dbo.SecondaryColor",
         "SELECT * FROM BirdDatabase.dbo.Family",
         "SELECT * FROM BirdDatabase.dbo.ConservationStatus",};
-
+    //TODO: Add tables for wing/bill shape
     private static final String[] tableNames = {
         "Locations",
         "Habitats",
@@ -33,7 +33,7 @@ public class FiltersToFeaturesRetriever {
         "Family",
         "ConservationStatus"
     };
-
+    //TODO: Add cases/methods for new tables
     public static Map<String, List<Feature>> getFilterToFeaturesMap() throws SQLException {
         int counter = 0;
         Map<String, List<Feature>> filterToSelectableFeature = new LinkedHashMap<>();
@@ -54,7 +54,7 @@ public class FiltersToFeaturesRetriever {
                     feature = getPrimaryColors(filter, query);
                     break;
                 case 4:
-                    feature = getSecondaryColors(filter, query);                    
+                    feature = getSecondaryColors(filter, query);
                     break;
                 case 5:
                     feature = getFamilies(filter, query);

@@ -115,7 +115,7 @@ public class BirdGUI extends JFrame {
         List<String> femaleNames = new ArrayList<>();
         List<String> maleNames = new ArrayList<>();
         List<String> neuterNames = new ArrayList<>();
-        int nS = WavFileRetriever.getNumberOfSounds(bird.getBirdId()); 
+        int nS = WavFileRetriever.getNumberOfSounds(bird.getBirdId());
         int nI = ImageRetriever.getNumberOfImages(bird.getBirdId());
         int numberOfButtons = nS > nI ? nS : nI;
         numberOfButtons = numberOfButtons == 0 ? 1 : numberOfButtons;

@@ -5,7 +5,7 @@ package bothell_bird;
  * @author Bret
  */
 //TODO: implement Comparable, override equals, hashCode, toString
-public class Feature implements Comparable   {
+public class Feature implements Comparable<Feature>  {
 
     private final int featureId;
     private final String featureName;
@@ -22,15 +22,9 @@ public class Feature implements Comparable   {
     public int getFeatureId() {
         return featureId;
     }
-    
+
     @Override
-    public int compareTo(Object other) {
-        Feature otherFeature = (Feature)other;
-        if(getFeatureId() > otherFeature.getFeatureId())
-            return 1;
-        else if(getFeatureId() < otherFeature.getFeatureId())
-            return -1;
-        return 0;
+    public int compareTo(Feature other) {
+        return getFeatureId() - other.getFeatureId();
     }
-    
 }

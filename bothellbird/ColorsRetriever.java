@@ -17,23 +17,24 @@ public class ColorsRetriever {
             + " BirdDatabase.dbo.uniqueBirdColors u, BirdDatabase.dbo.BirdColor b WHERE uniqueBirdId = ";
 
     private static final String join = " AND u.birdColorId = b.birdColorId";
-    public static List<Integer> getPrimaryColors(int birdId) throws SQLException {
-        return getColors("primaryColorId", birdId);
+
+    public static List<Feature> getPrimaryColors(int birdId) throws SQLException {
+        return getColors("primaryColorId", "primaryColor", birdId);
     }
 
-    public static List<Integer> getSecondaryColors(int birdId) throws SQLException {
-        return getColors("secondaryColorId", birdId);
+    public static List<Feature> getSecondaryColors(int birdId) throws SQLException {
+        return getColors("secondaryColorId", "secondaryColor", birdId);
     }
 
-    private static List<Integer> getColors(String columnName, int id) throws SQLException {
+    private static List<Feature> getColors(String IdColumn, String colorColumn, int id) throws SQLException {
         int i = SqlUtilities.getFeatureCount("uniqueBirdColors");
-        List<Integer> colors = new ArrayList<>();
+        List<Feature> colors = new ArrayList<>();
         Connection conn = SimpleDataSource.getconnection();
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery(getBirdColorsQuery + id + join);
         rs.next();
         for (int j = 0; j < i; j++) {
-            colors.add(rs.getInt(columnName));
+            colors.add(new Feature(rs.getInt(IdColumn), rs.getString(colorColumn)));
             rs.next();
         }
         return colors;

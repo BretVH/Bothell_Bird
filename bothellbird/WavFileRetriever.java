@@ -45,22 +45,25 @@ public class WavFileRetriever {
         }
         return inputStream;
     }
-    
+
     public static int getNumberOfSounds(int birdId) throws SQLException {
         Connection conn = SimpleDataSource.getconnection();
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery(query + birdId);
         rs.next();
         boolean hasSound = rs.getBoolean("hasSound");
-        boolean hasFemaleSound = rs.getBoolean("hasFemaleSound"); 
+        boolean hasFemaleSound = rs.getBoolean("hasFemaleSound");
         boolean hasMaleSound = rs.getBoolean("hasMaleSound");
         int numberOfSounds = 0;
-        if(hasSound)
+        if (hasSound) {
             numberOfSounds++;
-        if(hasMaleSound)
+        }
+        if (hasMaleSound) {
             numberOfSounds++;
-        if(hasFemaleSound)
+        }
+        if (hasFemaleSound) {
             numberOfSounds++;
+        }
         return numberOfSounds;
     }
 }
