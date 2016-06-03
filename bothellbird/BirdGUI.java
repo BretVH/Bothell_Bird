@@ -34,7 +34,7 @@ public class BirdGUI extends JFrame {
     private JButton back;
     private JScrollPane jscroll = new JScrollPane();
     private StringBuilder namesBirdIsKnownBy;
-    private Bird bird;
+    private DisplayBird bird;
 
     /**
      * Create application GUI.
@@ -43,7 +43,7 @@ public class BirdGUI extends JFrame {
      * @throws java.sql.SQLException
      * @throws java.io.IOException
      */
-    public BirdGUI(Bird bird) throws SQLException, IOException {
+    public BirdGUI(DisplayBird bird) throws SQLException, IOException {
         namesBirdIsKnownBy = new StringBuilder();
         namesBirdIsKnownBy.append("Species: ");
         namesBirdIsKnownBy.append(bird.getName());
