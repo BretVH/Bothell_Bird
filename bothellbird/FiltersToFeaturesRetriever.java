@@ -14,11 +14,14 @@ import java.util.Map;
  * @author Bret
  */
 public class FiltersToFeaturesRetriever {
+
     //TODO: Add query strings for bill/wing shape
     private static final String[] queriesForSelectableFeatures = {
         "SELECT * FROM BirdDatabase.dbo.Locations",
         "SELECT * FROM BirdDatabase.dbo.Habitats",
         "SELECT * FROM BirdDatabase.dbo.Size",
+        "SELECT * FROM BirdDatabase.dbo.Wing",
+        "SELECT * FROM BirdDatabase.dbo.Bill",
         "SELECT * FROM BirdDatabase.dbo.PrimaryColors",
         "SELECT * FROM BirdDatabase.dbo.SecondaryColor",
         "SELECT * FROM BirdDatabase.dbo.Family",
@@ -28,11 +31,14 @@ public class FiltersToFeaturesRetriever {
         "Locations",
         "Habitats",
         "Size",
+        "Wing",
+        "Bill",
         "PrimaryColors",
         "SecondaryColor",
         "Family",
         "ConservationStatus"
     };
+
     //TODO: Add cases/methods for new tables
     public static Map<String, List<Feature>> getFilterToFeaturesMap() throws SQLException {
         int counter = 0;
@@ -51,15 +57,21 @@ public class FiltersToFeaturesRetriever {
                     feature = getSizes(filter, query);
                     break;
                 case 3:
-                    feature = getPrimaryColors(filter, query);
+                    feature = getWings(filter, query);
                     break;
                 case 4:
-                    feature = getSecondaryColors(filter, query);
+                    feature = getBills(filter, query);
                     break;
                 case 5:
-                    feature = getFamilies(filter, query);
+                    feature = getPrimaryColors(filter, query);
                     break;
                 case 6:
+                    feature = getSecondaryColors(filter, query);
+                    break;
+                case 7:
+                    feature = getFamilies(filter, query);
+                    break;
+                case 8:
                     feature = getConservationStatuses(filter, query);
                     break;
             }
@@ -96,6 +108,15 @@ public class FiltersToFeaturesRetriever {
     private static List<Feature> getLocations(String tn, String q) throws SQLException {
         return getFeatureList(tn, q, "location", "locationId");
     }
+    
+    
+    private static List<Feature> getWings(String tn, String q) throws SQLException {
+        return getFeatureList(tn, q, "wing", "wingId");
+    }
+
+    private static List<Feature> getBills(String tn, String q) throws SQLException {
+        return getFeatureList(tn, q, "bill", "billId");
+    }
 
     private static List<Feature> getFeatureList(String tn, String q, String n, String id) throws SQLException {
         int count = SqlUtilities.getFeatureCount(tn);
@@ -113,5 +134,4 @@ public class FiltersToFeaturesRetriever {
         }
         return featureList;
     }
-
 }
