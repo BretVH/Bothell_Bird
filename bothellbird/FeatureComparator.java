@@ -6,8 +6,9 @@ import java.util.Comparator;
  *
  * @author Bret
  */
-public class FeatureComparator implements Comparator<Feature> {    
-     /**
+public class FeatureComparator implements Comparator<Feature> {
+
+    /**
      *
      * @param f1
      * @param f2
