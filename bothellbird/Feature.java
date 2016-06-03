@@ -4,7 +4,6 @@ package bothell_bird;
  *
  * @author Bret
  */
-//TODO: implement Comparable, override equals, hashCode, toString
 public class Feature implements Comparable<Feature> {
 
     private final int featureId;

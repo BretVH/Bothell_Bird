@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.List;
 import javax.swing.ImageIcon;
 
-//TODO: implement Comparable, override equals, hashCode, toString
 public class Bird implements Comparable<Bird>, Comparator<Bird> {
 
     private final int birdId;

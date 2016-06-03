@@ -49,7 +49,7 @@ public class BirdsListRetriever {
 
     public static Feature getDisplayBirdFeature(int featureId, String columnName) throws SQLException {
         String query;
-        switch(columnName) {
+        switch (columnName) {
             case "familyName":
                 query = fQuery;
                 break;
@@ -64,20 +64,21 @@ public class BirdsListRetriever {
                 break;
             case "wing":
                 query = wsQuery;
+                break;
             default:
                 return null;
         }
         return getFeature(featureId, columnName, query);
- 
+
     }
 
     private static Feature getFeature(int featureId, String columnName, String query) throws SQLException {
-         Connection conn = SimpleDataSource.getconnection();
+        Connection conn = SimpleDataSource.getconnection();
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery(query + featureId);
         rs.next();
         String featureName = rs.getString(columnName);
         return new Feature(featureId, featureName);
-        
+
     }
 }

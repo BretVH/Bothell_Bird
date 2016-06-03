@@ -106,7 +106,7 @@ public class BirdGUI extends JFrame {
         back.addActionListener(close);
         controlPanel.add(back);
     }
-
+    //probably should refactor this....
     private void populateBirdPicButtons() throws SQLException, IOException {
         List<JLabel> birdPicButtonLabels = new ArrayList<>();
         List<String> birdPicButtonLabelsText;
