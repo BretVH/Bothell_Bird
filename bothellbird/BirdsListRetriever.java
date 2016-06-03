@@ -39,31 +39,45 @@ public class BirdsListRetriever {
             int sId = rs.getInt("sizeId");
             int wId = rs.getInt("wingId");
             int bId = rs.getInt("billId");
-            ResultSet temp = stat.executeQuery(fQuery + fId);
-            temp.next();
-            String f = temp.getString("familyName");
-            temp = stat.executeQuery(sizeQuery + sId);
-            temp.next();
-            String s = temp.getString("size");
-            temp = stat.executeQuery(csQuery + cId);
-            temp.next();
-            String cs = temp.getString("conservationStatus");
-            temp = stat.executeQuery(bsQuery + bId);
-            temp.next();
-            String b = temp.getString("bill");
-            temp = stat.executeQuery(wsQuery + wId);
-            String w = temp.getString("wing");
-            Feature conStat = new Feature(cId, cs);
-            Feature fam = new Feature(fId, f);
-            Feature size = new Feature(sId, s);
-            Feature wing = new Feature(wId, w);
-            Feature bill = new Feature(bId, b);
-            String description = rs.getString("description");
-            Bird bird = new Bird(id, sn, conStat, fam, size, bill, wing, description);
+            Bird bird = new Bird(id, sn, cId, fId, sId, bId, wId);
             birds.add(bird);
             rs.next();
         }
         conn.close();
         return birds;
+    }
+
+    public static Feature getDisplayBirdFeature(int featureId, String columnName) throws SQLException {
+        String query;
+        switch(columnName) {
+            case "familyName":
+                query = fQuery;
+                break;
+            case "size":
+                query = fQuery;
+                break;
+            case "conservationStatus":
+                query = csQuery;
+                break;
+            case "bill":
+                query = bsQuery;
+                break;
+            case "wing":
+                query = wsQuery;
+            default:
+                return null;
+        }
+        return getFeature(featureId, columnName, query);
+ 
+    }
+
+    private static Feature getFeature(int featureId, String columnName, String query) throws SQLException {
+         Connection conn = SimpleDataSource.getconnection();
+        Statement stat = conn.createStatement();
+        ResultSet rs = stat.executeQuery(query + featureId);
+        rs.next();
+        String featureName = rs.getString(columnName);
+        return new Feature(featureId, featureName);
+        
     }
 }
