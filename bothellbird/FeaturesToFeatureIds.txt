@@ -55,6 +55,7 @@ HABITATS
 5	Wetlands (inland)
 10      Domestic
 LOCATIONS
+7       Africa
 6	Antarctia
 4	Asia
 5	Australia
@@ -63,16 +64,16 @@ LOCATIONS
 1	North America
 PRIMARY COLORS
 1	Black
-12	Black and White
+13	Black and White
 2	Blue
 3	Brown
-13	Brown and White
+12	Brown and White
 4	Gray
-15	Green
+14	Green
 5	Olive
 6	Orange
-16	Pink
-17	Purple or Violet
+15	Pink
+16	Purple or Violet
 7	Red
 8	Rufous or Rust
 9	Sheen or Iridescence
@@ -296,50 +297,67 @@ BIRDCOLORID PRIMARYCOLOR  SECONDARYCOLOR
 193	13	13
 194	13	14
 195	13	15
-196	15	1
-197	15	2
-198	15	3
-199	15	4
-200	15	5
-201	15	6
-202	15	7
-203	15	8
-204	15	9
-205	15	10
-206	15	11
-207	15	12
-208	15	13
-209	15	14
-210	15	15
-211	16	1
-212	16	2
-213	16	3
-214	16	4
-215	16	5
-216	16	6
-217	16	7
-218	16	8
-219	16	9
-220	16	10
-221	16	11
-222	16	12
-223	16	13
-224	16	14
-225	16	15
-226	17	1
-227	17	2
-228	17	3
-229	17	4
-230	17	5
-231	17	6
-232	17	7
-233	17	8
-234	17	9
-235	17	10
-236	17	11
-237	17	12
-238	17	13
-239	17	14
-240	17	15
+196	14	1
+197	14	2
+198	14	3
+199	14	4
+200	14	5
+201	14	6
+202	14	7
+203	14	8
+204	14	9
+205	14	10
+206	14	11
+207	14	12
+208	14	13
+209	14	14
+210	14	15
+211	15	1
+212	15	2
+213	15	3
+214	15	4
+215	15	5
+216	15	6
+217	15	7
+218	15	8
+219	15	9
+220	15	10
+221	15	11
+222	15	12
+223	15	13
+224	15	14
+225	15	15
+226	16	1
+227	16	2
+228	16	3
+229	16	4
+230	16	5
+231	16	6
+232	16	7
+233	16	8
+234	16	9
+235	16	10
+236	16	11
+237	16	12
+238	16	13
+239	16	14
+240	16	15
+BILL
+1	All-purpose
+2	Cone
+3	Curved (up or down)
+4	Dagger
+5	Hooked
+6	Hooked Seabird
+7	Needle
+8	Spatulate
+9	Specialized
+WING
+1	Broad Wings
+2	Long Wings
+3	Pointed Wings
+4	Rounded Wings
+5	Tapered Wings
+6	Very Long Wings
 */
 
