@@ -12,10 +12,12 @@ import java.util.ArrayList;
  */
 public class BirdNamesRetriever {
 
-    private static final String query = "SELECT * FROM BirdDatabase.dbo.names Where uniqueBirdId = ";
+    private static final String query
+            = "SELECT * FROM BirdDatabase.dbo.names Where uniqueBirdId = ";
 
-    public static ArrayList<BirdName> getAliasList(int birdId) throws SQLException {
-        int count = SqlUtilities.getFeatureCount("names");
+    public static ArrayList<BirdName> getAliasList(int birdId)
+            throws SQLException {
+        int count = SqlUtilities.getBirdFeaturesCount("names", birdId);
         Connection conn = SimpleDataSource.getconnection();
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery(query + birdId);

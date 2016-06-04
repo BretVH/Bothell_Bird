@@ -22,4 +22,17 @@ public class SqlUtilities {
         }
         return numberOfFeatures;
     }
+
+    static int getBirdFeaturesCount(String tn, int birdId) throws SQLException {
+        String countQuery = "SELECT COUNT (*) AS myCount FROM BirdDatabase.dbo." + tn;
+        String constraint = " WHERE uniqueBirdId = ";
+        Connection conn = SimpleDataSource.getconnection();
+        Statement stat = conn.createStatement();
+        ResultSet rs = stat.executeQuery(countQuery + constraint + birdId);
+        int numberOfBirdFeatures = 0;
+        while (rs.next()) {
+            numberOfBirdFeatures = rs.getInt("myCount");
+        }
+        return numberOfBirdFeatures;
+    }
 }

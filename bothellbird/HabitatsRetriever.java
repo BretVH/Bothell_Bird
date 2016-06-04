@@ -13,16 +13,15 @@ import java.util.List;
  */
 class HabitatsRetriever {
 
-    private static final String habitatsQuery = "SELECT b.habitatId, b.uniqueBirdId, "
+    private static final String habitatsQuery = "SELECT b.habitatId, "
+            + "b.uniqueBirdId, h.habitatNames "
             + "habitatNames FROM BirdDatabase.dbo.BirdHabitats b, "
             + "BirdDatabase.dbo.Habitats h WHERE uniqueBirdId = ";
-    
+
     private static final String join = "AND b.habitatId = h.habitatId";
-    
-    private static final String habitatIdsQuery = "SELECT * FROM BirdDatabase.dbo.BirdHabtitats WHERE uniqueBirdId = ";
 
     public static List<Feature> getHabitats(int birdId) throws SQLException {
-        int count = SqlUtilities.getFeatureCount("BirdHabitats");
+        int count = SqlUtilities.getBirdFeaturesCount("BirdHabitats", birdId);
         Connection conn = SimpleDataSource.getconnection();
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery(habitatsQuery + birdId + join);
@@ -36,12 +35,12 @@ class HabitatsRetriever {
         }
         return habitatsList;
     }
-    
+
     public static List<Integer> getHabitatIds(int birdId) throws SQLException {
-        int count = SqlUtilities.getFeatureCount("BirdHabitats");
+        int count = SqlUtilities.getBirdFeaturesCount("BirdHabitats", birdId);
         Connection conn = SimpleDataSource.getconnection();
         Statement stat = conn.createStatement();
-        ResultSet rs = stat.executeQuery(habitatIdsQuery + birdId);
+        ResultSet rs = stat.executeQuery(habitatsQuery + birdId + join);
         ArrayList<Integer> habitatIdsList = new ArrayList<>();
         rs.next();
         for (int i = 0; i < count; i++) {

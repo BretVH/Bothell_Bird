@@ -19,8 +19,7 @@ class MakeSound {
 
     /**
      *
-     * @param filename the nneuterimagee of the fnumberOfNamesle that
-     * numberOfNamess gonumberOfNamesng to be played
+     * @param stream the sound to be played
      *
      */
     public static void playSound(AudioInputStream stream) {

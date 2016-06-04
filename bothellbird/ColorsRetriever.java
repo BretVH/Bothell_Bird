@@ -13,12 +13,13 @@ import java.util.List;
  */
 public class ColorsRetriever {
 
-    private static final String getBirdColorIdsQuery = "SELECT * FROM BirdDatatbase.dbo.uniqueBirdColors WHERE uniqueBirdId = ";
+    private static final String getBirdColorsQuery = "SELECT u.birdColorId, u.uniqueBirdId, b.birdColorId,"
+            + "b.primaryColorId, b.secondaryColorId, p.primaryColor, s.secondaryColor from "
+            + "BirdDatabase.dbo.uniqueBirdColors u, BirdDatabase.dbo.BirdColor b, "
+            + "BirdDatabase.dbo.PrimaryColors p, BirdDatabase.dbo.SecondaryColor s WHERE uniqueBirdId = ";
 
-    private static final String getBirdColorsQuery = "SELECT * FROM"
-            + " BirdDatabase.dbo.uniqueBirdColors u, BirdDatabase.dbo.BirdColor b WHERE uniqueBirdId = ";
-
-    private static final String join = " AND u.birdColorId = b.birdColorId";
+    private static final String birdColorsJoin = " AND u.birdColorId = b.birdColorId AND b.primaryColorId = "
+            + "p.primaryColorId AND b.secondaryColorId = s.secondaryColorId";
 
     public static List<Feature> getPrimaryColors(int birdId) throws SQLException {
         return getColors("primaryColorId", "primaryColor", birdId);
@@ -37,11 +38,11 @@ public class ColorsRetriever {
     }
 
     private static List<Feature> getColors(String IdColumn, String colorColumn, int id) throws SQLException {
-        int i = SqlUtilities.getFeatureCount("uniqueBirdColors");
+        int i = SqlUtilities.getBirdFeaturesCount("uniqueBirdColors", id);
         List<Feature> colors = new ArrayList<>();
         Connection conn = SimpleDataSource.getconnection();
         Statement stat = conn.createStatement();
-        ResultSet rs = stat.executeQuery(getBirdColorsQuery + id + join);
+        ResultSet rs = stat.executeQuery(getBirdColorsQuery + id + birdColorsJoin);
         rs.next();
         for (int j = 0; j < i; j++) {
             colors.add(new Feature(rs.getInt(IdColumn), rs.getString(colorColumn)));
@@ -51,11 +52,11 @@ public class ColorsRetriever {
     }
 
     private static List<Integer> getColorIds(String columnName, int birdId) throws SQLException {
-        int i = SqlUtilities.getFeatureCount("uniqueBirdColors");
+        int i = SqlUtilities.getBirdFeaturesCount("uniqueBirdColors", birdId);
         List<Integer> colorIds = new ArrayList<>();
         Connection conn = SimpleDataSource.getconnection();
         Statement stat = conn.createStatement();
-        ResultSet rs = stat.executeQuery(getBirdColorIdsQuery + birdId);
+        ResultSet rs = stat.executeQuery(getBirdColorsQuery + birdId + birdColorsJoin);
         rs.next();
         for (int j = 0; j < i; j++) {
             colorIds.add(rs.getInt(columnName));

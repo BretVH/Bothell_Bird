@@ -96,7 +96,7 @@ public class GUI extends JFrame {
         populateBirdIconsAndNames();
         GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
 
-        this.setExtendedState(this.getExtendedState() | this.MAXIMIZED_BOTH);
+        this.setExtendedState(this.MAXIMIZED_BOTH | this.getExtendedState());
         setName("BothellBirder \u00a9 Bret Van Hof");
         setTitle("BothellBirder \u00a9 Bret Van Hof");
         setLayout(new BorderLayout());
@@ -359,7 +359,7 @@ public class GUI extends JFrame {
         public void actionPerformed(ActionEvent e) {
             //inefficient should sort/search
             for (Bird bird : birds) {
-                if (bird.getBirdId() == birdsJList.getSelectedValue()) {
+                if (bird.getBirdId() == (Integer) birdsJList.getSelectedValue()) {
                     try {
                         displayBirdGUI(new DisplayBird(bird));
                     } catch (SQLException | IOException ex) {
@@ -428,21 +428,25 @@ public class GUI extends JFrame {
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            int selectedFeatureIndex = selectableFeaturesJList.getSelectedIndex() + 1;
+            updatedBirdData = filterBirds(selectedFeatureIndex, filters[filterIndex]);
+            if (updatedBirdData != null) {
+                birds.retainAll(updatedBirdData);
+            } else {
+                birds = new LinkedHashSet<>();
+            }
+            birdsJList.removeAll();
+            try {
+                updateJList(birds);
+            } catch (IOException | SQLException ex) {
+                Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+            }
             if (filterIndex >= filters.length - 1) {
                 imagePanel.removeAll();
                 imagePanel.add(defaultPicture);
                 imagePanel.revalidate();
                 filterIndex = 0;
             } else {
-                int selectedFeatureIndex = selectableFeaturesJList.getSelectedIndex() + 1;
-                updatedBirdData = filterBirds(selectedFeatureIndex, filters[filterIndex]);
-                birds.retainAll(updatedBirdData);
-                birdsJList.removeAll();
-                try {
-                    updateJList(birds);
-                } catch (IOException | SQLException ex) {
-                    Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
-                }
                 try {
                     createFeaturesJList(filterIndex + 1);
                 } catch (SQLException ex) {
@@ -467,9 +471,9 @@ public class GUI extends JFrame {
                     return filterBySize(featureId);
                 case "Locations":
                     return filterByLocation(featureId);
-                case "Bill Shape":
+                case "Bill":
                     return filterByBillShape(featureId);
-                case "Wing Shape":
+                case "Wing":
                     return filterByWingShape(featureId);
                 default:
                     return null;
@@ -513,7 +517,6 @@ public class GUI extends JFrame {
                 List<Integer> habitats = bird.getHabitatIds();
                 if (habitats.contains(featureId)) {
                     remainingBirds.add(bird);
-                    break;
                 }
             }
             return remainingBirds;

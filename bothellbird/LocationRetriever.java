@@ -16,13 +16,11 @@ class LocationRetriever {
     private static final String locationsQuery = "SELECT b.locationId, b.uniqueBirdId, "
             + "location FROM BirdDatabase.dbo.BirdLocations b, "
             + "BirdDatabase.dbo.Locations l WHERE uniqueBirdId = ";
-    
+
     private static final String join = " AND b.locationId = l.locationId";
 
-    private static final String locationIdsQuery = "SELECT * FROM BirdDatabase.dbo.BirdLocations WHERE uniqueBirdId = ";
-    
     static List<Feature> getLocations(int birdId) throws SQLException {
-        int count = SqlUtilities.getFeatureCount("BirdLocations");
+        int count = SqlUtilities.getBirdFeaturesCount("BirdLocations", birdId);
         Connection conn = SimpleDataSource.getconnection();
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery(locationsQuery + birdId + join);
@@ -36,12 +34,12 @@ class LocationRetriever {
         }
         return locations;
     }
-    
-      public static List<Integer> getLocationIds(int birdId) throws SQLException {
-        int count = SqlUtilities.getFeatureCount("BirdLocations");
+
+    public static List<Integer> getLocationIds(int birdId) throws SQLException {
+        int count = SqlUtilities.getBirdFeaturesCount("BirdLocations", birdId);
         Connection conn = SimpleDataSource.getconnection();
         Statement stat = conn.createStatement();
-        ResultSet rs = stat.executeQuery(locationIdsQuery + birdId);
+        ResultSet rs = stat.executeQuery(locationsQuery + birdId + join);
         ArrayList<Integer> locationIdsList = new ArrayList<>();
         rs.next();
         for (int i = 0; i < count; i++) {

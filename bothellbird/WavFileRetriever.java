@@ -33,12 +33,12 @@ public class WavFileRetriever {
         }
         if (hasSound) {
             if (gender == 'm') {
-                inputStream = AudioSystem.getAudioInputStream(InputStreamRetriever.make(birdId, 'm', 1, "wav"));
+                inputStream = AudioSystem.getAudioInputStream(InputStreamRetriever.make(birdId, 'm', 0, "wav"));
             } else if (gender == 'f') {
-                inputStream = AudioSystem.getAudioInputStream(InputStreamRetriever.make(birdId, 'f', 1, "wav"));
+                inputStream = AudioSystem.getAudioInputStream(InputStreamRetriever.make(birdId, 'f', 0, "wav"));
 
             } else {
-                inputStream = AudioSystem.getAudioInputStream(InputStreamRetriever.make(birdId, 'a', 1, "wav"));
+                inputStream = AudioSystem.getAudioInputStream(InputStreamRetriever.make(birdId, 'a', 0, "wav"));
             }
         } else {
             inputStream = AudioSystem.getAudioInputStream(InputStreamRetriever.make(0, 'a', 0, "wav"));

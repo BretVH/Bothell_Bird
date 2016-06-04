@@ -22,7 +22,8 @@ public class Bird implements Comparable<Bird>, Comparator<Bird> {
     private final int billShapeId;
     private final int wingShapeId;
 
-    public Bird(int birdId, String name, int csId, int fId, int sId, int bsId, int wsId) throws SQLException, IOException {
+    public Bird(int birdId, String name, int csId, int fId, int sId,
+            int bsId, int wsId) throws SQLException, IOException {
         this.birdId = birdId;
         this.scientificName = name;
         this.conservationStatusId = csId;
@@ -33,7 +34,7 @@ public class Bird implements Comparable<Bird>, Comparator<Bird> {
         this.names = setNames();
         this.primaryColorIds = setPrimaryColorIds();
         this.secondaryColorIds = setSecondaryColorIds();
-        this.icon = ImageRetriever.getImageIcon(birdId, 'n', false);
+        this.icon = ImageRetriever.getListIcon(birdId);
         this.habitatIds = setHabitatIds();
         this.locationIds = setLocationIds();
     }

@@ -106,6 +106,7 @@ public class BirdGUI extends JFrame {
         back.addActionListener(close);
         controlPanel.add(back);
     }
+
     //probably should refactor this....
     private void populateBirdPicButtons() throws SQLException, IOException {
         List<JLabel> birdPicButtonLabels = new ArrayList<>();
@@ -139,7 +140,8 @@ public class BirdGUI extends JFrame {
             birdPicButtons[0].setMargin(new Insets(0, 0, 0, 0));
             ActionListener soundActionListener = new SoundAction('n');
             birdPicButtons[0].addActionListener(soundActionListener);
-            makeButton(0, alias, birdPicButtonLabels, birdPicButtonLabelsText, 'n');
+            makeButton(0, alias, birdPicButtonLabels, birdPicButtonLabelsText,
+                    'n');
             birdPicButtonLabels.get(0).setText(birdPicButtonLabelsText.get(0));
             birdGUIMainPanel.add(birdPicButtonLabels.get(0));
         } else {
@@ -152,7 +154,8 @@ public class BirdGUI extends JFrame {
             birdPicButtons[0].setMargin(new Insets(0, 0, 0, 0));
             ActionListener soundActionListenerF = new SoundAction('f');
             birdPicButtons[0].addActionListener(soundActionListenerF);
-            makeButton(0, alias, birdPicButtonLabels, birdPicButtonLabelsText, 'f');
+            makeButton(0, alias, birdPicButtonLabels, birdPicButtonLabelsText,
+                    'f');
             birdPicButtonLabels.get(0).setText(birdPicButtonLabelsText.get(0));
             birdGUIMainPanel.add(birdPicButtonLabels.get(0));
             alias = new StringBuilder();
@@ -164,14 +167,18 @@ public class BirdGUI extends JFrame {
             birdPicButtons[1].setMargin(new Insets(0, 0, 0, 0));
             ActionListener soundActionListenerM = new SoundAction('m');
             birdPicButtons[1].addActionListener(soundActionListenerM);
-            makeButton(1, alias, birdPicButtonLabels, birdPicButtonLabelsText, 'm');
+            makeButton(1, alias, birdPicButtonLabels, birdPicButtonLabelsText,
+                    'm');
             birdPicButtonLabels.get(1).setText(birdPicButtonLabelsText.get(1));
             birdGUIMainPanel.add(birdPicButtonLabels.get(1));
         }
     }
 
-    private void makeButton(int counter, StringBuilder alias, List<JLabel> birdPicButtonLabels, List<String> birdPicButtonLabelsText, char gender) throws SQLException, IOException {
-        ImageIcon image = ImageRetriever.getImageIcon(bird.getBirdId(), gender, true);
+    private void makeButton(int counter, StringBuilder alias,
+            List<JLabel> birdPicButtonLabels,
+            List<String> birdPicButtonLabelsText, char gender)
+            throws SQLException, IOException {
+        ImageIcon image = ImageRetriever.getLargeIcon(bird.getBirdId(), gender);
         birdPicButtonLabelsText.add(alias.toString());
         birdPicButtonLabels.add(new JLabel(birdPicButtonLabelsText.get(counter)));
         birdGUIMainPanel.add(birdPicButtonLabels.get(counter));
