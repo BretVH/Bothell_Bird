@@ -1,300 +1,215 @@
-package bothellbird;
+package bothell_bird;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.DataLine;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.SourceDataLine;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JWindow;
 
-public class BirdGUI extends JFrame
-{
+public class BirdGUI extends JFrame {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 7801651004788925924L;
-	private JPanel panel;
-	private JPanel panel_1;
-	private JPanel control;
-	private JTextArea txtrTest;
-	private JLabel label;
-	private JLabel namesLabel;
-	private JButton[] btnBirdPic;
-	private BirdNameRetriever getStuff;
-	private int birdId;
-	private ImageIcon male;
-	private ImageIcon female;
-	private ImageIcon am;
-	private JButton back;
-	private JScrollPane jscroll = new JScrollPane();
-	private String named = "Bird Names: ";
+    /**
+     *
+     */
+    private static final long serialVersionUID = 7801651004788925924L;
+    private JPanel birdGUIMainPanel;
+    private JPanel birdDescriptionPanel;
+    private JPanel controlPanel;
+    private JTextArea birdDescriptionTextArea;
+    private JButton[] birdPicButtons;
+    private JButton back;
+    private JScrollPane jscroll = new JScrollPane();
+    private StringBuilder namesBirdIsKnownBy;
+    private DisplayBird bird;
 
-	/**
-	 * Launch the application.
-	 */
-	class MakeSound { 
-		 
-	    private final int BUFFER_SIZE = 128000; 
-	    private File soundFile; 
-	    private AudioInputStream audioStream; 
-	    private AudioFormat audioFormat; 
-	    private  SourceDataLine sourceLine; 
-	 
-	    /** 
-	     *  
-	     * @param filename the name of the file that is going to be played 
-	     * 
-	     */ 
-	    public void playSound(String filename){ 
-	 
-	        String strFilename = filename; 
-	 
-	        try { 
-	            soundFile = new File(strFilename); 
-	        } catch (Exception e) { 
-	            e.printStackTrace(); 
-	            System.exit(1); 
-	        } 
-	 
-	        try { 
-	            audioStream = AudioSystem.getAudioInputStream(soundFile); 
-	        } catch (Exception e){ 
-	            e.printStackTrace(); 
-	           System.exit(1); 
-	        } 
-	 
-	        audioFormat = audioStream.getFormat(); 
-	 
-	        DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat); 
-	        try { 
-	            sourceLine = (SourceDataLine) AudioSystem.getLine(info); 
-	            sourceLine.open(audioFormat); 
-	        } catch (LineUnavailableException e) { 
-	            e.printStackTrace(); 
-	            System.exit(1); 
-	        } catch (Exception e) { 
-	            e.printStackTrace(); 
-	            System.exit(1); 
-	        } 
-	 
-	        sourceLine.start(); 
-	 
-	        int nBytesRead = 0; 
-	        byte[] abData = new byte[BUFFER_SIZE]; 
-	        while (nBytesRead != -1) { 
-	            try { 
-	                nBytesRead = audioStream.read(abData, 0, abData.length); 
-	            } catch (IOException e) { 
-	                e.printStackTrace(); 
-	            } 
-	            if (nBytesRead >= 0) { 
-	                @SuppressWarnings("unused") 
-	                int nBytesWritten = sourceLine.write(abData, 0, nBytesRead); 
-	            } 
-	        } 
-	 
-	        sourceLine.drain(); 
-	        sourceLine.close(); 
-	    } 
-	} 
-	class SoundAction implements ActionListener
-	{
-		@Override
-		public void actionPerformed(ActionEvent e) 
-		{
-			// TODO Auto-generated method stub
-			MakeSound play = new MakeSound();
-			play.playSound("0a0.wav");		
-		}
-		
-	}
+    /**
+     * Create application GUI.
+     *
+     * @param bird
+     * @throws java.sql.SQLException
+     * @throws java.io.IOException
+     */
+    public BirdGUI(DisplayBird bird) throws SQLException, IOException {
+        namesBirdIsKnownBy = new StringBuilder();
+        namesBirdIsKnownBy.append("Species: ");
+        namesBirdIsKnownBy.append(bird.getName());
+        namesBirdIsKnownBy.append(". Common Names: ");
+        this.bird = bird;
+        for (BirdName currentName : bird.getNames()) {
+            namesBirdIsKnownBy.append(currentName.getName());
+            switch (currentName.getGender()) {
+                case 'f':
+                case 'F':
+                    namesBirdIsKnownBy.append("(Female)");
+                    break;
+                case 'm':
+                case 'M':
+                    namesBirdIsKnownBy.append("(Male)");
+                    break;
+            }
+            namesBirdIsKnownBy.append(", ");
+        }
+        initComponents();
+    }
 
-	class closeAction implements ActionListener
-	{
-		@Override
-		public void actionPerformed(ActionEvent e) 
-		{
-			disposer();		
-		}
-		
-	}
+    private void initComponents() throws SQLException, IOException {
+        birdGUIMainPanel = new JPanel();
+        birdGUIMainPanel.setLayout(new GridLayout());
+        birdDescriptionPanel = new JPanel();
+        controlPanel = new JPanel();
+        birdDescriptionTextArea = new JTextArea();
+        String birdDescription = getDescriptionText();
+        setBirdDescription(birdDescription);
+        revalidate();
+        populateBirdPicButtons();
+        initControlsPanel();
+        this.setLayout(new BorderLayout());
+        this.add(controlPanel, BorderLayout.NORTH);
+        this.add(birdGUIMainPanel, BorderLayout.CENTER);
+        this.add(birdDescriptionPanel, BorderLayout.SOUTH);
+    }
 
-	/**
-	 * Create the frame.
-	 */
-	public BirdGUI(int ID, ArrayList<String> common) 
-	{
-		birdId = ID;
-		for(String numName : common)
-		{
-			named += numName + ", ";
-		}
-		initComponents();
-	
-	}
-	private void initComponents()
-	{
-		panel = new JPanel();
-		panel.setLayout(new GridLayout());
-		panel_1 = new JPanel();
-		control = new JPanel();
-		txtrTest = new JTextArea();
-		getBirdData();
-		getText();
-		back = new JButton("Close Bird display and return to Bothell Bird");
-		ActionListener close = new closeAction(); 
-		back.addActionListener(close);
-		control.add(back);
-		this.setLayout(new BorderLayout());
-		this.add(control, BorderLayout.NORTH);
-		this.add(panel, BorderLayout.CENTER);
-		this.add(panel_1, BorderLayout.SOUTH);
-	}
-	public void disposer()
-	{
-		this.dispose();
-	}
-	private void getBirdData()
-	{
-		getStuff = new BirdNameRetriever();
-		GenderRetriever sex = new GenderRetriever();
-		String scientificName = "";
-		try {
-			scientificName = getStuff.getScientificName(birdId);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		LinkedHashMap<String, String> genders = new LinkedHashMap<String, String>();
-		try {
-			genders = sex.getGender(birdId);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		@SuppressWarnings("unchecked")
-		Collection<String> named =  genders.keySet();
-		ArrayList<String> names = new ArrayList<String>();
-		names.addAll(named);
-		ArrayList<JLabel> namesLabel = new ArrayList<JLabel>();
-		ArrayList<String> labelTxt = new ArrayList<String>();
-		labelTxt.add(this.named + " Bird Species: " + scientificName);
-		int i = names.size();
-		btnBirdPic = new JButton[i];
-		int k = 0;
-		ActionListener soundOff = new SoundAction();
-		for(String name : names)
-		{
-			ImageMaker maker = new ImageMaker();
-			SoundMaker sMaker = new SoundMaker();
-			String gen = genders.get(name);
-			btnBirdPic[k] = new JButton("");
-			btnBirdPic[k].setMargin(new Insets(0, 0, 0, 0));
-			btnBirdPic[k].addActionListener(soundOff);
-			if(gen.charAt(0) == 'm' || gen.charAt(0) == 'M')
-			{
-				name.concat(" ,(Male)");
-				labelTxt.add(name);
-				namesLabel.add(new JLabel(labelTxt.get(k)));
-				panel.add(namesLabel.get(k));
-				try {
-					male = maker.bigImage(birdId, sex.getNameId(birdId, name));
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				btnBirdPic[k].setIcon(male);
-				panel.add(btnBirdPic[k]);
-				try {
-					File maleSound = sMaker.getSound(birdId, sex.getNameId(birdId, name));
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			else if(gen.charAt(0) == 'f' || gen.charAt(0) == 'F')
-			{
-				name.concat(" ,(Female)");
-				labelTxt.add(name);
-				namesLabel.add(new JLabel(labelTxt.get(k)));
-				panel.add(namesLabel.get(k));
-				try {
-					female = maker.bigImage(birdId, sex.getNameId(birdId, name));
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-				btnBirdPic[k].setIcon(female);
-				panel.add(btnBirdPic[k]);
-				try {
-					File femaleSound = sMaker.getSound(birdId, sex.getNameId(birdId, name));
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			else
-			{
-				try {
-					am = maker.bigImage(birdId, sex.getNameId(birdId, name));
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				labelTxt.add(name);
-				namesLabel.add(new JLabel(labelTxt.get(k)));
-				panel.add(namesLabel.get(k));
-				btnBirdPic[k].setIcon(am);
-				panel.add(btnBirdPic[k]);
-				try {
-					File amSound = sMaker.getSound(birdId, sex.getNameId(birdId, name));
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			k++;
-		}	
-	}
-	
-	private void getText()
-	{
-		String description = "";
-		descriptionMaker descr = new descriptionMaker();
-		try {
-			description = descr.getDescription(birdId);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		txtrTest.setText(description);
-		txtrTest.setEditable(false);
-		jscroll = new JScrollPane(txtrTest, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-		panel_1.add(jscroll);
-		revalidate();
-	}
+    public void disposer() {
+        this.dispose();
+    }
+
+    private String getDescriptionText() {
+        return bird.toString();
+    }
+
+    private void setBirdDescription(String description) {
+        birdDescriptionTextArea.setText(description);
+        birdDescriptionTextArea.setEditable(false);
+        jscroll = new JScrollPane(birdDescriptionTextArea,
+                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        birdDescriptionPanel.add(jscroll);
+    }
+
+    private void initControlsPanel() {
+        back = new JButton("Close Bird display and return to Bothell Bird");
+        ActionListener close = new closeAction();
+        back.addActionListener(close);
+        controlPanel.add(back);
+    }
+
+    //probably should refactor this....
+    private void populateBirdPicButtons() throws SQLException, IOException {
+        List<JLabel> birdPicButtonLabels = new ArrayList<>();
+        List<String> birdPicButtonLabelsText;
+        birdPicButtonLabelsText = new ArrayList<>();
+        birdPicButtonLabelsText.add(this.namesBirdIsKnownBy.toString());
+        List<String> femaleNames = new ArrayList<>();
+        List<String> maleNames = new ArrayList<>();
+        List<String> neuterNames = new ArrayList<>();
+        int nS = WavFileRetriever.getNumberOfSounds(bird.getBirdId());
+        int nI = ImageRetriever.getNumberOfImages(bird.getBirdId());
+        int numberOfButtons = nS > nI ? nS : nI;
+        numberOfButtons = numberOfButtons == 0 ? 1 : numberOfButtons;
+        birdPicButtons = new JButton[numberOfButtons];
+        for (BirdName name : bird.getNames()) {
+            if (name.getGender() == 'f') {
+                femaleNames.add(name.getName());
+            } else if (name.getGender() == 'm') {
+                maleNames.add(name.getName());
+            } else {
+                neuterNames.add(name.getName());
+            }
+        }
+
+        if (numberOfButtons < 2) {
+            StringBuilder alias = new StringBuilder();
+            for (String name : neuterNames) {
+                alias.append(name + " ");
+            }
+            birdPicButtons[0] = new JButton("");
+            birdPicButtons[0].setMargin(new Insets(0, 0, 0, 0));
+            ActionListener soundActionListener = new SoundAction('n');
+            birdPicButtons[0].addActionListener(soundActionListener);
+            makeButton(0, alias, birdPicButtonLabels, birdPicButtonLabelsText,
+                    'n');
+            birdPicButtonLabels.get(0).setText(birdPicButtonLabelsText.get(0));
+            birdGUIMainPanel.add(birdPicButtonLabels.get(0));
+        } else {
+            StringBuilder alias = new StringBuilder();
+            alias.append("Female Names: ");
+            for (String name : femaleNames) {
+                alias.append(name + " ");
+            }
+            birdPicButtons[0] = new JButton("");
+            birdPicButtons[0].setMargin(new Insets(0, 0, 0, 0));
+            ActionListener soundActionListenerF = new SoundAction('f');
+            birdPicButtons[0].addActionListener(soundActionListenerF);
+            makeButton(0, alias, birdPicButtonLabels, birdPicButtonLabelsText,
+                    'f');
+            birdPicButtonLabels.get(0).setText(birdPicButtonLabelsText.get(0));
+            birdGUIMainPanel.add(birdPicButtonLabels.get(0));
+            alias = new StringBuilder();
+            alias.append("Male Names: ");
+            for (String name : maleNames) {
+                alias.append(name + " ");
+            }
+            birdPicButtons[1] = new JButton("");
+            birdPicButtons[1].setMargin(new Insets(0, 0, 0, 0));
+            ActionListener soundActionListenerM = new SoundAction('m');
+            birdPicButtons[1].addActionListener(soundActionListenerM);
+            makeButton(1, alias, birdPicButtonLabels, birdPicButtonLabelsText,
+                    'm');
+            birdPicButtonLabels.get(1).setText(birdPicButtonLabelsText.get(1));
+            birdGUIMainPanel.add(birdPicButtonLabels.get(1));
+        }
+    }
+
+    private void makeButton(int counter, StringBuilder alias,
+            List<JLabel> birdPicButtonLabels,
+            List<String> birdPicButtonLabelsText, char gender)
+            throws SQLException, IOException {
+        ImageIcon image = ImageRetriever.getLargeIcon(bird.getBirdId(), gender);
+        birdPicButtonLabelsText.add(alias.toString());
+        birdPicButtonLabels.add(new JLabel(birdPicButtonLabelsText.get(counter)));
+        birdGUIMainPanel.add(birdPicButtonLabels.get(counter));
+        birdPicButtons[counter].setIcon(image);
+        birdGUIMainPanel.add(birdPicButtons[counter]);
+
+    }
+
+    class SoundAction implements ActionListener {
+
+        private final char gender;
+
+        SoundAction(char gender) {
+            this.gender = gender;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try {
+                MakeSound.playSound(WavFileRetriever.getSound(bird.getBirdId(), gender));
+            } catch (SQLException | IOException | UnsupportedAudioFileException ex) {
+                Logger.getLogger(BirdGUI.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    class closeAction implements ActionListener {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            disposer();
+        }
+    }
 }
