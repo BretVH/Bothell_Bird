@@ -16,15 +16,15 @@ import java.util.Map;
 public class FiltersToFeaturesRetriever {
 
     private static final String[] queriesForSelectableFeatures = {
-        "SELECT * FROM BirdDatabase.dbo.Locations",
-        "SELECT * FROM BirdDatabase.dbo.Habitats",
-        "SELECT * FROM BirdDatabase.dbo.Size",
-        "SELECT * FROM BirdDatabase.dbo.Wing",
-        "SELECT * FROM BirdDatabase.dbo.Bill",
-        "SELECT * FROM BirdDatabase.dbo.PrimaryColors",
-        "SELECT * FROM BirdDatabase.dbo.SecondaryColor",
-        "SELECT * FROM BirdDatabase.dbo.Family",
-        "SELECT * FROM BirdDatabase.dbo.ConservationStatus",};
+        "SELECT * FROM Locations",
+        "SELECT * FROM Habitats",
+        "SELECT * FROM Size",
+        "SELECT * FROM Wing",
+        "SELECT * FROM Bill",
+        "SELECT * FROM PrimaryColors",
+        "SELECT * FROM SecondaryColor",
+        "SELECT * FROM Family",
+        "SELECT * FROM ConservationStatus",};
 
     private static final String[] tableNames = {
         "Locations",
