@@ -1,9 +1,6 @@
 package bothell_bird;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 /**
  *
@@ -12,7 +9,7 @@ import java.sql.Statement;
 public class SqlUtilities {
 
     public static int getFeatureCount(String tn) throws SQLException {
-        String countQuery = "SELECT COUNT (*) AS myCount FROM BirdDatabase.dbo." + tn;
+        String countQuery = "SELECT COUNT (*) AS myCount FROM " + tn;
         Connection conn = SimpleDataSource.getconnection();
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery(countQuery);
@@ -24,11 +21,12 @@ public class SqlUtilities {
     }
 
     static int getBirdFeaturesCount(String tn, int birdId) throws SQLException {
-        String countQuery = "SELECT COUNT (*) AS myCount FROM BirdDatabase.dbo." + tn;
-        String constraint = " WHERE uniqueBirdId = ";
+        String countQuery = "SELECT COUNT (*) AS myCount FROM " + tn;
+        String constraint = " WHERE uniqueBirdId = ?";
         Connection conn = SimpleDataSource.getconnection();
-        Statement stat = conn.createStatement();
-        ResultSet rs = stat.executeQuery(countQuery + constraint + birdId);
+        PreparedStatement stat = conn.prepareStatement(countQuery + constraint);
+        stat.setInt(1, birdId);
+        ResultSet rs = stat.executeQuery();
         int numberOfBirdFeatures = 0;
         while (rs.next()) {
             numberOfBirdFeatures = rs.getInt("myCount");

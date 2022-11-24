@@ -13,12 +13,12 @@ import java.util.List;
  */
 public class ColorsRetriever {
 
-    private static final String getBirdColorsQuery = "SELECT u.birdColorId, u.uniqueBirdId, b.birdColorId,"
+    private static final String getBirdColorsQuery = "SELECT u.birdColorId, u.uniqueBirdId, b.birdColor,"
             + "b.primaryColorId, b.secondaryColorId, p.primaryColor, s.secondaryColor from "
-            + "BirdDatabase.dbo.uniqueBirdColors u, BirdDatabase.dbo.BirdColor b, "
-            + "BirdDatabase.dbo.PrimaryColors p, BirdDatabase.dbo.SecondaryColor s WHERE uniqueBirdId = ";
+            + "uniqueBirdColors u, BirdColor b, "
+            + "PrimaryColors p, SecondaryColor s WHERE uniqueBirdId = ";
 
-    private static final String birdColorsJoin = " AND u.birdColorId = b.birdColorId AND b.primaryColorId = "
+    private static final String birdColorsJoin = " AND u.birdColorId = b.birdColor AND b.primaryColorId = "
             + "p.primaryColorId AND b.secondaryColorId = s.secondaryColorId";
 
     public static List<Feature> getPrimaryColors(int birdId) throws SQLException {

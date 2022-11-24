@@ -1,9 +1,6 @@
 package bothell_bird;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,16 +11,17 @@ import java.util.List;
 class LocationRetriever {
 
     private static final String locationsQuery = "SELECT b.locationId, b.uniqueBirdId, "
-            + "location FROM BirdDatabase.dbo.BirdLocations b, "
-            + "BirdDatabase.dbo.Locations l WHERE uniqueBirdId = ";
+            + "location FROM BirdLocations b, "
+            + "Locations l WHERE uniqueBirdId = ?";
 
     private static final String join = " AND b.locationId = l.locationId";
 
     static List<Feature> getLocations(int birdId) throws SQLException {
         int count = SqlUtilities.getBirdFeaturesCount("BirdLocations", birdId);
         Connection conn = SimpleDataSource.getconnection();
-        Statement stat = conn.createStatement();
-        ResultSet rs = stat.executeQuery(locationsQuery + birdId + join);
+        PreparedStatement stat = conn.prepareStatement(locationsQuery + join);
+        stat.setString(1, Integer.toString(birdId));
+        ResultSet rs = stat.executeQuery();
         ArrayList<Feature> locations = new ArrayList<>();
         rs.next();
         for (int i = 0; i < count; i++) {
@@ -38,8 +36,9 @@ class LocationRetriever {
     public static List<Integer> getLocationIds(int birdId) throws SQLException {
         int count = SqlUtilities.getBirdFeaturesCount("BirdLocations", birdId);
         Connection conn = SimpleDataSource.getconnection();
-        Statement stat = conn.createStatement();
-        ResultSet rs = stat.executeQuery(locationsQuery + birdId + join);
+        PreparedStatement stat = conn.prepareStatement(locationsQuery + join);
+        stat.setString(1, Integer.toString(birdId));
+        ResultSet rs = stat.executeQuery();
         ArrayList<Integer> locationIdsList = new ArrayList<>();
         rs.next();
         for (int i = 0; i < count; i++) {

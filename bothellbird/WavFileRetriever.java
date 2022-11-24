@@ -1,5 +1,6 @@
 package bothell_bird;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -11,8 +12,8 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 public class WavFileRetriever {
 
-    private static final String query = "SELECT [hasMaleSound], [hasFemaleSound], [hasSound] FROM"
-            + " BirdDatabase.dbo.Files where uniqueBirdID = ";
+    private static final String query = "SELECT hasMaleSound, hasFemaleSound, hasSound FROM"
+            + " Files where uniqueBirdID = ";
 
     public static AudioInputStream getSound(int birdId, char gender) throws SQLException, IOException, UnsupportedAudioFileException {
         Connection conn = SimpleDataSource.getconnection();
@@ -33,15 +34,15 @@ public class WavFileRetriever {
         }
         if (hasSound) {
             if (gender == 'm') {
-                inputStream = AudioSystem.getAudioInputStream(InputStreamRetriever.make(birdId, 'm', 0, "wav"));
+                inputStream = AudioSystem.getAudioInputStream(new ByteArrayInputStream(InputStreamRetriever.make(birdId, 'a', 0, "wav").getData()));
             } else if (gender == 'f') {
-                inputStream = AudioSystem.getAudioInputStream(InputStreamRetriever.make(birdId, 'f', 0, "wav"));
+                inputStream = AudioSystem.getAudioInputStream(new ByteArrayInputStream(InputStreamRetriever.make(birdId, 'a', 0, "wav").getData()));
 
             } else {
-                inputStream = AudioSystem.getAudioInputStream(InputStreamRetriever.make(birdId, 'a', 0, "wav"));
+                inputStream = AudioSystem.getAudioInputStream(new ByteArrayInputStream(InputStreamRetriever.make(birdId, 'a', 0, "wav").getData()));
             }
         } else {
-            inputStream = AudioSystem.getAudioInputStream(InputStreamRetriever.make(0, 'a', 0, "wav"));
+            inputStream = AudioSystem.getAudioInputStream(new ByteArrayInputStream(InputStreamRetriever.make(0, 'a', 0, "wav").getData()));
         }
         return inputStream;
     }

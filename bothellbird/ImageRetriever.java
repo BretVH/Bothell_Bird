@@ -10,8 +10,8 @@ import javax.swing.ImageIcon;
 
 public class ImageRetriever {
 
-    private static final String query = "SELECT [hasMaleImage], [hasFemaleImage], [hasImage] FROM"
-            + " BirdDatabase.dbo.Files where uniqueBirdID = ";
+    private static final String query = "SELECT hasMaleImage, hasFemaleImage, hasImage, hasSmallImage FROM"
+            + " Files where uniqueBirdID = ";
 
     public static ImageIcon getListIcon(int uniqueBirdId) throws SQLException, IOException {
         Connection conn = SimpleDataSource.getconnection();
@@ -23,8 +23,7 @@ public class ImageRetriever {
         if (hasImage) {
             return getMyIcon(uniqueBirdId, 'a', 1);
         } else {
-            InputStream in = InputStreamRetriever.make(0, 'a', 0, "Jpg");
-            byte[] imageData = org.apache.commons.io.IOUtils.toByteArray(in);
+            byte[] imageData = InputStreamRetriever.make(0, 'a', 0, "Jpg").getData();
             return new ImageIcon(imageData);
         }
     }
@@ -53,16 +52,13 @@ public class ImageRetriever {
 
     private static ImageIcon getMyIcon(int uniqueBirdId, char gender, int imageSize) throws SQLException, IOException {
         if (gender == 'm' || gender == 'M' && imageSize > 1) {
-            InputStream in = InputStreamRetriever.make(uniqueBirdId, 'm', imageSize, "Jpg");
-            byte[] imageData = org.apache.commons.io.IOUtils.toByteArray(in);
+            byte[] imageData = InputStreamRetriever.make(uniqueBirdId, 'm', imageSize, "Jpg").getData();
             return new ImageIcon(imageData);
         } else if (gender == 'f' || gender == 'F' && imageSize > 1) {
-            InputStream in = InputStreamRetriever.make(uniqueBirdId, 'f', imageSize, "Jpg");
-            byte[] imageData = org.apache.commons.io.IOUtils.toByteArray(in);
+            byte[] imageData  = InputStreamRetriever.make(uniqueBirdId, 'f', imageSize, "Jpg").getData();
             return new ImageIcon(imageData);
         } else {
-            InputStream in = InputStreamRetriever.make(uniqueBirdId, 'a', imageSize, "Jpg");
-            byte[] imageData = org.apache.commons.io.IOUtils.toByteArray(in);
+            byte[] imageData  = InputStreamRetriever.make(uniqueBirdId, 'a', imageSize, "Jpg").getData();
             return new ImageIcon(imageData);
         }
     }

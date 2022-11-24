@@ -1,28 +1,25 @@
 package bothell_bird;
 
+import net.ucanaccess.complex.Attachment;
+
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Blob;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class InputStreamRetriever {
 
-    public static InputStream make(int ID, char gender, int num, String type) throws SQLException, FileNotFoundException, IOException {
-        Blob blob;
-        try (Connection conn = SimpleDataSource.getconnection()) {
-            Statement stat = conn.createStatement();
-            final String prefix = ID + "" + gender + "" + num;
-            String query = "SELECT * FROM"
-                    + " MyBirdStore.dbo.Store Where name = '"
-                    + prefix + "." + type + "'";
-            ResultSet rs = stat.executeQuery(query);
+    public static Attachment make(int ID, char gender, int num, String type) throws SQLException, FileNotFoundException, IOException {
+        Connection conn = SimpleDataSource.getconnection();
+            String prefix = Integer.toString(ID) + gender + num;
+            String query = "SELECT Chart FROM"
+                    + " Store Where fileName = ?";
+            PreparedStatement statement = conn.prepareStatement(query);
+            statement.setString(1, prefix + "." + type);
+            ResultSet rs = statement.executeQuery();
             rs.next();
-            blob = rs.getBlob("Chart");
-        }
-        return (InputStream) blob.getBinaryStream();
+            Attachment[] att = (Attachment[]) rs.getObject("Chart");
+            return att[0];
     }
 }

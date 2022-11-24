@@ -9,12 +9,12 @@ public class BirdsListRetriever {
 
     private static Set<Bird> birds;
     //get database table
-    private static final String getBirdInfoQuery = "SELECT * FROM BirdDatabase.dbo.uniqueBirds";
-    private static final String sizeQuery = "SELECT size FROM BirdDatabase.dbo.Size WHERE sizeId = ";
-    private static final String csQuery = "SELECT conservationStatus FROM BirdDatabase.dbo.ConservationStatus WHERE conservationStatusId = ";
-    private static final String fQuery = "SELECT familyName FROM BirdDatabase.dbo.Family WHERE familyNameId = ";
-    private static final String bsQuery = "SELECT bill From BirdDatabase.dbo.Bill WHERE billId = ";
-    private static final String wsQuery = "SELECT wing From BirdDatabase.dbo.Wing WHERE wingId = ";
+    private static final String getBirdInfoQuery = "SELECT * FROM uniqueBirds";
+    private static final String sizeQuery = "SELECT size FROM Size WHERE sizeId = ";
+    private static final String csQuery = "SELECT conservationStatus FROM ConservationStatus WHERE conservationStatusId = ";
+    private static final String fQuery = "SELECT familyName FROM Family WHERE familyNameId = ";
+    private static final String bsQuery = "SELECT bill From Bill WHERE billId = ";
+    private static final String wsQuery = "SELECT wing From Wing WHERE wingId = ";
 
     /**
      * queries server to populate a list of Birds
@@ -54,7 +54,7 @@ public class BirdsListRetriever {
                 query = fQuery;
                 break;
             case "size":
-                query = fQuery;
+                query = sizeQuery;
                 break;
             case "conservationStatus":
                 query = csQuery;

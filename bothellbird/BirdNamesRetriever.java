@@ -13,7 +13,7 @@ import java.util.ArrayList;
 public class BirdNamesRetriever {
 
     private static final String query
-            = "SELECT * FROM BirdDatabase.dbo.names Where uniqueBirdId = ";
+            = "SELECT * FROM names Where uniqueBirdId = ";
 
     public static ArrayList<BirdName> getAliasList(int birdId)
             throws SQLException {
